@@ -13,6 +13,7 @@ import Journal from '../views/nav2/Journal.vue'
 import Role from '../views/nav1/Role.vue'
 import Resource from '../views/nav1/Resource.vue'
 import Echarts from '../views/charts/Echarts.vue'
+import Files1 from '../views/files/Files1'
 
 export const constantRoutes = [
     {
@@ -48,6 +49,16 @@ export const constantRoutes = [
             { path: '/table', component: Table, name: '用户管理',menuShow: true},
             { path: '/role', component: Role, name: '角色管理',menuShow: true},
             { path: '/resource', component: Resource, name: '资源管理',menuShow: true},
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '文件管理',
+        iconCls:'fa fa-folder',//图标样式class
+        menuShow: true,
+        children: [
+            { path: '/files1', component: Files1, name: '10086文件管理',menuShow: true},
         ]
     },
     {

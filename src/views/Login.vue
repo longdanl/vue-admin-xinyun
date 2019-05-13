@@ -24,8 +24,6 @@
 </template>
 
 <script>
- // import { requestLogin } from '../api/api';
-
   //导入自己封装的axios：
   import request from '../utils/request';
   import qs from 'qs';
@@ -57,17 +55,17 @@
         });
       },
       handleSubmit2(ev) {
-        var _this = this;
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
             this.logining = true;
             this.$store.dispatch('user/login', this.ruleForm2)
                     .then(() => {
+                      console.log("登录成功");
                       if(this.ruleForm2.username==="admin" && this.ruleForm2.password==="admin"){
                         this.$message({
                           message:'登录成功',
                           type:'success'
-                        })
+                        });
                         this.$router.push({ path: '/table' });
                         this.loading = false
                       }else{

@@ -5,7 +5,7 @@ export function refresh(data) {
     return request({
         url: '/api/oauth/token',
         method: 'post',
-        auth:{username:"test",password:"test"},
+        auth:{username:"omc",password:"xinyun"},
         data
     })
 }

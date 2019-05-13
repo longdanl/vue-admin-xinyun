@@ -4,36 +4,33 @@
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
 			<el-form :inline="true" :model="filters">
 				<el-form-item>
-					<el-input v-model="filters.id" placeholder="用户ID"></el-input>
+					<el-input v-model="filters.username" placeholder="文件名"></el-input>
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="getUsersById">查询</el-button>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" @click="handleAdd">新增用户</el-button>
+					<el-button type="primary" @click="handleAdd">上传文件</el-button>
 				</el-form-item>
 				<el-form-item class="btn" style="float: right">
 					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
-		<!--列表-->
-		<el-table align:="center" :data="users" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 74%;">
+		<el-table align:="center" :data="files" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 62%;">
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column prop="username" label="用户名" width="200">
+			<el-table-column prop="name" label="文件名" width="200">
 			</el-table-column>
-			<el-table-column prop="phone" label="手机号码"  width="200">
+			<el-table-column prop="size" label="文件大小"  width="200">
 			</el-table-column>
-			<el-table-column prop="email" label="用户邮箱" width="200">
+			<el-table-column prop="time" label="上传时间" width="200">
 			</el-table-column>
-			<el-table-column prop="id" label="用户ID" width="200" sortable>
+			<el-table-column prop="see" label="预览" width="200px" :formatter="formatActive">
 			</el-table-column>
-			<el-table-column prop="active" label="当前状态" width="200px" :formatter="formatActive" sortable>
-			</el-table-column>
-			<el-table-column label="操作" width=184 class="showBtn">
+			<el-table-column label="操作" width="174" class="showBtn">
 				<template scope="scope">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">设置</el-button>
 					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
@@ -45,59 +42,16 @@
 			</el-pagination>
 		</el-col>
 		<!--编辑界面-->
-		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
-			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-				<el-form-item label="用户名" prop="name">
-					<el-input v-model="editForm.username" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="用户密码">
-					<el-input v-model="editForm.password"></el-input>
-				</el-form-item>
-				<el-form-item label="手机号码">
-					<el-input v-model="editForm.phone"></el-input>
-				</el-form-item>
-				<el-form-item label="用户邮箱">
-					<el-input v-model="editForm.email"></el-input>
-				</el-form-item>
-				<el-form-item label="当前状态">
-					<el-radio-group v-model="editForm.active">
-						<el-radio class="radio" :label="1">启用</el-radio>
-						<el-radio class="radio" :label="0">禁用</el-radio>
-					</el-radio-group>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer">
-				<el-button @click.native="editFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="updateUsers" :loading="editLoading">提交</el-button>
-			</div>
-		</el-dialog>
-		<!--新增界面-->
-		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
-			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="用户名" prop="name">
-					<el-input v-model="addForm.username" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="用户密码">
-					<el-input v-model="addForm.password"></el-input>
-				</el-form-item>
-				<el-form-item label="手机号码">
-					<el-input v-model="addForm.phone"></el-input>
-				</el-form-item>
-				<el-form-item label="用户邮箱">
-					<el-input v-model="addForm.email"></el-input>
-				</el-form-item>
-				<el-form-item label="当前状态">
-					<el-radio-group v-model="addForm.active">
-						<el-radio class="radio" :label="1">启用</el-radio>
-						<el-radio class="radio" :label="0">禁用</el-radio>
-					</el-radio-group>
-				</el-form-item>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer">
-				<el-button @click.native="addFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="addUsers" :loading="addLoading">提交</el-button>
-			</div>
+		<el-dialog title="设置主叫号码" v-model="editFormVisible" :close-on-click-modal="false">
+			<el-table align:="center" :data="phone" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 30%;">
+				<el-table-column prop="name" label="主叫号码" width="200">
+				</el-table-column>
+				<el-table-column label="操作" width="174" class="showBtn">
+					<template scope="scope">
+						<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
 		</el-dialog>
 	</section>
 </template>
@@ -110,7 +64,7 @@ export default {
 			filters: {
 				id: ''
 			},
-			users: [],
+			files: [],
 			total: 0,
 			page: 1,
 			listLoading: false,
@@ -122,36 +76,13 @@ export default {
 					{required: true, message: '请输入用户名', trigger: 'blur'}
 				]
 			},
-			//编辑界面数据
+			//设置界面数据
 			editForm: {
-				id: 0,
-				username: '',
-				password:'',
-				phone: "",
-				email: '',
-				active: "",
+				phone:""
 			},
-			addFormVisible: false,//新增界面是否显示
-			addLoading: false,
-			addFormRules: {
-				username: [
-					{required: true, message: '请输入用户名', trigger: 'blur'}
-				]
-			},
-			//新增界面数据
-			addForm: {
-				id: 0,
-				username: '',
-				password:'',
-				phone: "",
-				email: '',
-				active: "",
-			}
-
 		}
 	},
 	created() {
-		//this.listLoading=true;
 		this.getUsers();
 	},
 	methods: {
@@ -171,34 +102,7 @@ export default {
 		async getUsersById() {
 			//this.listLoading = true;
 			const res = await getUsersById(this.filters.id);
-			if(res.code!=0){
-				this.$message({
-					message: res.description,
-					type: 'error'
-				});
-			}else{
-				console.log(res)
-				let list = new Array();
-				let user = res;
-				let users = list.push(user)
-				console.log("users----"+users)
-				//this.users = users;
-				console.log(list);
-				this.users = list
-			}
-			/*var arr=[];
-			for(let i in res){
-				let o=res[i];
-				arr.push(o);
-			}
-			console.log(arr);*/
-			/*let self = [];
-			for(var i in res){
-				self.push(res[i]);
-			}
-			console.log(self);*/
-			/*this.users = res;
-			console.log("this.users"+this.users);*/
+			console.log(res);
 			//console.log(res.list);
 			/*this.total = res.total;
 			let page = 1;
@@ -256,50 +160,51 @@ export default {
 		},
 		//批量删除用户
 		deleteUsersBatch() {
-			var ids = this.sels.map(item => item.id);
+			var ids = this.sels.map(item => item.id).toString();
+			console.log(ids);
 			this.$confirm('确认删除选中记录吗？', '提示', {
 				type: 'warning'
 			}).then(async() => {
-				this.listLoading = false;
-				let para = { ids: ids };
-				await deleteUsersBatch(para);
+				this.listLoading = true;
+				await deleteUsersBatch(ids);
 				this.$message({
 					message: '删除成功',
 					type: 'success'
 				});
-				this.getUsers()
-			}).catch(error => {
-				this.$message({
-				message: error.description,
-				type: 'success'
-			}); })
+			}).catch(err => { console.error(err) })
 		},
 		//显示编辑界面
 		handleEdit: function (index, row) {
 			this.editFormVisible = true;
 			this.editForm = Object.assign({}, row);
+			let see =  this.editForm;
+			console.log("see :" + see.toString());
 		},
 		//编辑用户
 		async updateUsers() {
-			this.$confirm('确认修改该记录吗?', '提示', {
+			await updateUsers(this.editForm.id,this.editForm);
+			this.editFormVisible = false;
+			/*this.$confirm('确认修改该记录吗?', '提示', {
 				type: 'warning'
 			}).then(async() => {
-				let id = this.editForm.id;
-				console.log(id);
-				await updateUsers(id,this.editForm);
-				this.editFormVisible = false;
+				await updateRole(row.id, this.editForm);
+				/!*for (let index = 0; index < this.rolesList.length; index++) {
+					if (this.rolesList[index].key === this.role.key) {
+						this.rolesList.splice(index, 1, Object.assign({}, this.role))
+						break
+					}
+				}*!/
 				this.editLoading = false;
 				this.$message({
 					message: '修改成功',
 					type: 'success'
 				});
-				this.getUsers();
 			}).catch(err => {
 				this.$message({
 					message: err.description,
-					type: 'error'
+					type: 'success'
 				});
-			})
+			})*/
 		},
 		//显示新增界面
 		handleAdd: function () {
@@ -321,7 +226,7 @@ export default {
 				type: 'success'
 			});
 			this.addFormVisible = false;
-			this.addLoading = false;
+			this.addLoading = true;
 			this.$refs['addForm'].resetFields();
 			console.log(res);
 			this.getUsers();

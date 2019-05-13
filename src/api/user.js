@@ -7,9 +7,8 @@ export function login(data) {
     method: 'post',
     auth:{username:"omc",password:"xinyun"},
     data
-  })
+  });
 }
-
 /*//获取用户信息
 export function getInfo() {
   return request({

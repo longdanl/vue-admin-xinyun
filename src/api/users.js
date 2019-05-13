@@ -30,10 +30,9 @@ export function addUsers(data) {
     })
 }
 //修改用户信息
-export function updateUsers(data) {
-    console.log(data.id + "--point2");
+export function updateUsers(id,data) {
     return request({
-        url:'/api/users/'+data.id,
+        url:'/api/users/'+id,
         method: 'put',
         data: data
     })

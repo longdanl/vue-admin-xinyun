@@ -35,7 +35,7 @@ export default {
 				});
 			} else {
 				this.currentTime = new Date().getTime();
-				let refresh_token = JSON.parse(localStorage.getItem('refresh_token'));
+				//let refresh_token = JSON.parse(localStorage.getItem('refresh_token'));
 				//console.log('刷新refresh_token:'+refresh_token);
 				//var loginParams = {  grant_type: "refresh_token", refresh_token:refresh_token  };
 				/*request({
