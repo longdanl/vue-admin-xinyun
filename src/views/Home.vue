@@ -9,10 +9,14 @@
 				<a>{{collapsed?'':sysName}}</a>
 			</div>
 			<div class="topbar-title">
-				<span style="font-size: 18px;color: #fff;">后台管理系统</span>
+				<!--展开折叠开关-->
+				<div @click.prevent="collapse">
+					<i class="fa fa-bars" aria-hidden="true" v-show="!collapsed"><span style="font-size: 18px;color: #fff;">&nbsp;后台管理系统</span></i>
+					<i class="fa fa-bars" aria-hidden="true" v-show="collapsed"><span style="font-size: 18px;color: #fff;">&nbsp;后台管理系统</span></i>
+				</div>
 			</div>
 			<div class="topbar-account topbar-btn">
-				<i class="fa fa-envelope" aria-hidden="true" style="font-size: 20px;color: white;margin-right: 10px"></i>
+				<i class="fa fa-envelope" aria-hidden="true" style="font-size: 24px;color: white;margin-right: 10px"><el-badge is-dot class="item"></el-badge></i>
 				<el-dropdown trigger="click">
 					<el-dropdown trigger="hover">
 						<span class="el-dropdown-link userinfo-inner"><img src="../assets/user.png" />系统管理员</span>
@@ -27,11 +31,6 @@
 		<el-col :span="24" class="main">
 			<!--左侧导航-->
 			<aside :class="{showSidebar:!collapsed}">
-				<!--展开折叠开关-->
-				<div class="menu-toggle" @click.prevent="collapse">
-					<i class="fa fa-angle-double-left" aria-hidden="true" v-show="!collapsed"></i>
-					<i class="fa fa-angle-double-right" aria-hidden="true" v-show="collapsed"></i>
-				</div>
 				<!--导航菜单-->
 				<el-menu :default-active="defaultActiveIndex" router :collapse="collapsed" @select="handleSelect">
 					<template v-for="(item,index) in $router.options.routes" v-if="item.menuShow">
@@ -72,61 +71,64 @@
 </template>
 
 <script>
-	import {bus} from '../bus.js'
-	export default {
-		name: 'home',
-		created(){
-			bus.$on('setNickName', (text) => {
-				this.nickname = text;
-			})
+import {logout} from "@/api/user"
+import { getToken} from '../utils/auth'
+import {bus} from '../bus.js'
+export default {
+	name: 'home',
+	created(){
+		bus.$on('setNickName', (text) => {
+			this.nickname = text;
+		})
+	},
+	data () {
+		return {
+			defaultActiveIndex: "0",
+			nickname: '',
+			collapsed: false,
+			sysName:'XINYUN'
+		}
+	},
+	methods: {
+		handleSelect(index){
+			this.defaultActiveIndex = index;
 		},
-		data () {
-			return {
-				defaultActiveIndex: "0",
-				nickname: '',
-				collapsed: false,
-				sysName:'XINYUN'
-			}
+		//折叠导航栏
+		collapse: function () {
+			this.collapsed = !this.collapsed;
 		},
-		methods: {
-			handleSelect(index){
-				this.defaultActiveIndex = index;
-			},
-			//折叠导航栏
-			collapse: function () {
-				this.collapsed = !this.collapsed;
-			},
-			logout(){
-				let that = this;
-				this.$confirm('确认退出吗?', '提示', {
-					confirmButtonClass: 'el-button--warning'
-				}).then(() => {
-					//确认
-					that.loading = true;
-					API.logout().then(function (result) {
-						that.loading = false;
-						localStorage.removeItem('access-user');
-						that.$router.go('/login'); //用go刷新
-					}, function (err) {
-						that.loading = false;
-						that.$message.error({showClose: true, message: err.toString(), duration: 2000});
-					}).catch(function (error) {
-						that.loading = false;
-						console.log(error);
-						that.$message.error({showClose: true, message: '请求出现异常', duration: 2000});
-					});
-				}).catch(() => {});
-			}
-		},
-		mounted() {
-			var user = sessionStorage.getItem('user');
-			if (user) {
-				user = JSON.parse(user);
-				this.sysUserName = user.name || '';
-				this.sysUserAvatar = user.avatar || '';
-			}
+		logout(){
+			this.$confirm('确认退出吗?', '提示', {
+				confirmButtonClass: 'el-button--warning'
+			}).then(() => {
+				this.$store.dispatch('user/logout')
+						.then(() => {
+							this.$message({
+								message:"退出成功",
+								type:'success'
+							});
+							this.$router.push({ path: '/login' });
+						})
+						.catch((error) => {
+							this.loading = false;
+							this.$message({
+								message:error.description,
+								type:'error'
+							});
+						});
+				this.logining = false;
+			}).catch(() => {});
+		}
+	},
+	mounted() {
+		var user = sessionStorage.getItem('user');
+		if (user) {
+			user = JSON.parse(user);
+			this.sysUserName = user.name || '';
+			this.sysUserAvatar = user.avatar || '';
 		}
 	}
+}
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
@@ -155,6 +157,10 @@
 	}
 	.topbar-logo .show{
 		display:block
+	}
+	.item {
+		margin-top:-12px;
+		left:-2px;
 	}
 	.topbar-logos {
 		float: left;
@@ -249,9 +255,11 @@
 		background-color: #7ed2df;
 	}
 	}
-
+    .fa{
+		color: white;
+		font-size: 20px;
+	}
 	.menu-toggle {
-		background: #4A5064;
 		text-align: center;
 		color: white;
 		height: 26px;

@@ -1,9 +1,9 @@
 <template>
-  <div style="height: 100%;">
-    <p>
-      这样这个div的高度就会100%了
-    </p>
-  </div>
+  <el-card class="box-card">
+    <div v-for="o in 4" :key="o" class="text item">
+      {{'列表内容 ' + o }}
+    </div>
+  </el-card>
 </template>
 <script>
 

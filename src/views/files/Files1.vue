@@ -4,85 +4,205 @@
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
 			<el-form :inline="true" :model="filters">
 				<el-form-item>
-					<el-input v-model="filters.username" placeholder="文件名"></el-input>
+					<i class="fa fa-music" aria-hidden="true" style="color: royalblue">&nbsp;<strong style="color: royalblue">音频文件</strong></i>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" @click="getUsersById">查询</el-button>
-				</el-form-item>
-				<el-form-item>
-					<el-button type="primary" @click="handleAdd">上传文件</el-button>
+					<el-button size="small" @click="addMusic">导入音频</el-button>
 				</el-form-item>
 				<el-form-item class="btn" style="float: right">
 					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
-		<el-table align:="center" :data="files" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 62%;">
+		<!--列表-->
+		<el-table align:="center" :data="users" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 70%;">
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column prop="name" label="文件名" width="200">
+			<el-table-column prop="username" label="文件名" width="200">
 			</el-table-column>
-			<el-table-column prop="size" label="文件大小"  width="200">
+			<el-table-column prop="phone" label="文件大小"  width="200">
 			</el-table-column>
-			<el-table-column prop="time" label="上传时间" width="200">
+			<el-table-column prop="email" label="上传时间" width="220">
 			</el-table-column>
-			<el-table-column prop="see" label="预览" width="200px" :formatter="formatActive">
+			<el-table-column prop="see" label="预览" width="160">
 			</el-table-column>
-			<el-table-column label="操作" width="174" class="showBtn">
+			<el-table-column prop="remarks" label="备注" width="168">
+			</el-table-column>
+			<el-table-column label="操作" width=170 class="showBtn">
 				<template scope="scope">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">设置</el-button>
-					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+					<el-button type="success" size="small" @click="handleChoose(scope.$index, scope.row)">选择</el-button>
+					<el-button size="small" type="primary" @click="handleSet(scope.$index, scope.row)">设置</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-button type="danger" @click="deleteUsersBatch" :disabled="this.sels.length===0">批量删除</el-button>
 			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
 			</el-pagination>
 		</el-col>
-		<!--编辑界面-->
-		<el-dialog title="设置主叫号码" v-model="editFormVisible" :close-on-click-modal="false">
-			<el-table align:="center" :data="phone" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 30%;">
-				<el-table-column prop="name" label="主叫号码" width="200">
-				</el-table-column>
-				<el-table-column label="操作" width="174" class="showBtn">
-					<template scope="scope">
-						<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
-					</template>
-				</el-table-column>
-			</el-table>
+		<!--导入音频界面-->
+		<el-dialog title="导入音频" v-model="addMusicVisible" :close-on-click-modal="false">
+			<el-form :model="addMusicForm" label-width="80px" ref="addMusicForm">
+				<el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" :on-change="handleChange" :file-list="fileList">
+					<el-button type="primary">点击导入</el-button><p slot="tip" class="el-upload__tip">（只能上传jpg/png文件，且不超过500kb）</p>
+				</el-upload>
+				<el-form-item label="备注" prop="remarks">
+					<el-input v-model="addMusic.remarks" auto-complete="off"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addMusicVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="addUsers" :loading="addMusicLoading">提交</el-button>
+			</div>
 		</el-dialog>
+		<!--新增用户界面-->
+		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
+			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
+				<el-form-item label="用户名" prop="name">
+					<el-input v-model="addForm.username" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="手机号码">
+					<el-input v-model="addForm.phone"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addFormVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="addUsers" :loading="addLoading">提交</el-button>
+			</div>
+		</el-dialog>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="filters">
+				<el-form-item>
+					<i class="fa fa-video-camera" aria-hidden="true" style="color: royalblue">&nbsp;<strong style="color: royalblue">视频文件</strong></i>
+				</el-form-item>
+				<el-form-item>
+					<el-button size="small" @click="addVideo">导入视频</el-button>
+				</el-form-item>
+				<el-form-item class="btn" style="float: right">
+					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
+		<!--列表-->
+		<el-table align:="center" :data="users" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 70%;">
+			<el-table-column type="selection" width="55">
+			</el-table-column>
+			<el-table-column prop="username" label="文件名" width="200">
+			</el-table-column>
+			<el-table-column prop="phone" label="文件大小"  width="200">
+			</el-table-column>
+			<el-table-column prop="email" label="上传时间" width="220">
+			</el-table-column>
+			<el-table-column prop="see" label="预览" width="160">
+			</el-table-column>
+			<el-table-column prop="remarks" label="备注" width="168">
+			</el-table-column>
+			<el-table-column label="操作" width=170 class="showBtn">
+				<template scope="scope">
+					<el-button type="success" size="small" @click="handleChoose(scope.$index, scope.row)">选择</el-button>
+					<el-button size="small" type="primary" @click="handleSet(scope.$index, scope.row)">设置</el-button>
+				</template>
+			</el-table-column>
+		</el-table>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar">
+			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
+			</el-pagination>
+		</el-col>
+		<!--导入视频界面-->
+		<el-dialog title="导入视频" v-model="addVideoVisible" :close-on-click-modal="false">
+			<el-form :model="addVideoForm" label-width="80px" ref="addVideoForm">
+				<el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" :on-change="handleChange" :file-list="fileList">
+					<el-button type="primary">点击导入</el-button><p slot="tip" class="el-upload__tip">（只能上传3gp文件，且不超过500kb）</p>
+				</el-upload>
+				<el-form-item label="备注" prop="remarks">
+					<el-input v-model="addVideo.remarks" auto-complete="off"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addVideoVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="addUsers" :loading="addVideoLoading">提交</el-button>
+			</div>
+		</el-dialog>
+		<!--新增用户界面-->
+		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
+			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
+				<el-form-item label="用户名" prop="name">
+					<el-input v-model="addForm.username" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="手机号码">
+					<el-input v-model="addForm.phone"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addFormVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="addUsers" :loading="addLoading">提交</el-button>
+			</div>
+		</el-dialog>
+
 	</section>
 </template>
-
 <script>
-import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById, deleteUsersBatch } from '@/api/users'
+import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById } from '@/api/users'
 export default {
 	data() {
 		return {
 			filters: {
 				id: ''
 			},
-			files: [],
+			fileList: [],
+			users: [],
 			total: 0,
 			page: 1,
 			listLoading: false,
 			sels: [],//列表选中列
+			//编辑界面数据
 			editFormVisible: false,//编辑界面是否显示
 			editLoading: false,
 			editFormRules: {
 				username: [
-					{required: true, message: '请输入用户名', trigger: 'blur'}
+					{required: true, message: '请输入用户名', trigger: 'blur'},
+				],
+				phone: [
+					{required: true, message: '请输入用户名', trigger: 'blur'},
 				]
 			},
-			//设置界面数据
 			editForm: {
-				phone:""
+				username: '',
+				phone:'',
 			},
+			addMusicVisible: false,//新增界面是否显示
+			addMusicLoading: false,
+			//新增音频界面数据
+			addMusicForm: {
+				remarks: '',
+			},
+			addVideoVisible: false,//新增界面是否显示
+			addVideoLoading: false,
+			//新增音频界面数据
+			addVideoForm: {
+				remarks: '',
+			},
+			addFormVisible: false,//新增界面是否显示
+			addLoading: false,
+			addFormRules: {
+				username: [
+					{required: true, message: '请输入用户名', trigger: 'blur'},
+				],
+				phone: [
+					{required: true, message: '请输入用户名', trigger: 'blur'},
+				]
+			},
+			//新增界面数据
+			addForm: {
+				username: '',
+				phone: "",
+			}
 		}
 	},
 	created() {
+		//this.listLoading=true;
 		this.getUsers();
 	},
 	methods: {
@@ -102,7 +222,42 @@ export default {
 		async getUsersById() {
 			//this.listLoading = true;
 			const res = await getUsersById(this.filters.id);
-			console.log(res);
+			if(res.code!==0 && this.filters.id !==""){
+				this.$message({
+					message: res.description,
+					type: 'error'
+				});
+				this.users=""
+			}else if(this.filters.id ==""){
+				this.$message({
+					message: "请输入用户ID",
+					type: 'error'
+				});
+				this.users=""
+			}else{
+				console.log(res)
+				let list = new Array();
+				let user = res;
+				let users = list.push(user)
+				console.log("users----"+users)
+				//this.users = users;
+				console.log(list);
+				this.users = list;
+				this.filters.id=""
+			}
+			/*var arr=[];
+			for(let i in res){
+				let o=res[i];
+				arr.push(o);
+			}
+			console.log(arr);*/
+			/*let self = [];
+			for(var i in res){
+				self.push(res[i]);
+			}
+			console.log(self);*/
+			/*this.users = res;
+			console.log("this.users"+this.users);*/
 			//console.log(res.list);
 			/*this.total = res.total;
 			let page = 1;
@@ -134,13 +289,13 @@ export default {
 			//console.log("this.users"+this.users);
 		},
 		selsChange: function (sels) {
-		this.sels = sels;
+			this.sels = sels;
 		},
-		//删除用户
-		handleDel(index, row) {
+		//选择文件
+		handleChoose(index, row) {
 			let para = {id: row.id};
 			console.log(para.id)
-			this.$confirm('确认删除该记录吗?', '提示', {
+			this.$confirm('确认选择该文件作为视频彩铃吗?', '提示', {
 				type: 'warning'
 			}).then(async() => {
 				await deleteUsers(para.id);
@@ -151,71 +306,59 @@ export default {
 					message: '删除成功',
 					type: 'success'
 				});
-			}).catch(error => {
-				this.$message({
-					message: error.description,
-					type: 'success'
-				});
-			})
-		},
-		//批量删除用户
-		deleteUsersBatch() {
-			var ids = this.sels.map(item => item.id).toString();
-			console.log(ids);
-			this.$confirm('确认删除选中记录吗？', '提示', {
-				type: 'warning'
-			}).then(async() => {
-				this.listLoading = true;
-				await deleteUsersBatch(ids);
-				this.$message({
-					message: '删除成功',
-					type: 'success'
-				});
-			}).catch(err => { console.error(err) })
+			}).catch(()=> {})
 		},
 		//显示编辑界面
 		handleEdit: function (index, row) {
 			this.editFormVisible = true;
 			this.editForm = Object.assign({}, row);
-			let see =  this.editForm;
-			console.log("see :" + see.toString());
 		},
 		//编辑用户
 		async updateUsers() {
-			await updateUsers(this.editForm.id,this.editForm);
-			this.editFormVisible = false;
-			/*this.$confirm('确认修改该记录吗?', '提示', {
+			this.$confirm('确认修改该记录吗?', '提示', {
 				type: 'warning'
 			}).then(async() => {
-				await updateRole(row.id, this.editForm);
-				/!*for (let index = 0; index < this.rolesList.length; index++) {
-					if (this.rolesList[index].key === this.role.key) {
-						this.rolesList.splice(index, 1, Object.assign({}, this.role))
-						break
-					}
-				}*!/
+				let id = this.editForm.id;
+				console.log(id);
+				await updateUsers(id,this.editForm);
+				this.editFormVisible = false;
 				this.editLoading = false;
 				this.$message({
 					message: '修改成功',
 					type: 'success'
 				});
+				this.getUsers();
 			}).catch(err => {
 				this.$message({
 					message: err.description,
-					type: 'success'
+					type: 'error'
 				});
-			})*/
+			})
+		},
+		//显示导入音频界面
+		addMusic(){
+			this.addMusicVisible = true;
+			this.addMusicForm = {
+				remarks: ''
+			}
+		},
+		//导入音频
+		handleChange(file, fileList) {
+			this.fileList = fileList.slice(-3);
+		},
+		//显示导入视频界面
+		addVideo(){
+			this.addVideoVisible = true;
+			this.addVideoForm = {
+				remarks: 'haha'
+			}
 		},
 		//显示新增界面
-		handleAdd: function () {
+		handleSet: function () {
 			this.addFormVisible = true;
 			this.addForm = {
-				id: 0,
 				username: '',
-				password:'',
 				phone: "",
-				email: '',
-				active: "",
 			};
 		},
 		//新增用户
@@ -226,91 +369,22 @@ export default {
 				type: 'success'
 			});
 			this.addFormVisible = false;
-			this.addLoading = true;
+			this.addLoading = false;
 			this.$refs['addForm'].resetFields();
 			console.log(res);
 			this.getUsers();
 		},
-		/*//编辑
-		editSubmit: function () {
-
-			this.$refs.editForm.validate((valid) => {
-				if (valid) {
-					this.$confirm('确认提交吗？', '提示', {}).then(() => {
-						this.editLoading = true;
-						//NProgress.start();
-						let para = Object.assign({}, this.editForm);
-						para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-						editUser(para).then((res) => {
-							this.editLoading = false;
-							//NProgress.done();
-							this.$message({
-								message: '提交成功',
-								type: 'success'
-							});
-							this.$refs['editForm'].resetFields();
-							this.editFormVisible = false;
-							this.getUsers();
-						});
-					});
-				}
-			});
-		},*/
-		//新增
-		/*addSubmit: function () {
-			this.$refs.addForm.validate((valid) => {
-				if (valid) {
-					this.$confirm('确认提交吗？', '提示', {}).then(() => {
-						this.addLoading = true;
-						//NProgress.start();
-						let para = Object.assign({}, this.addForm);
-						para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-						addUser(para).then((res) => {
-							this.addLoading = false;
-							//NProgress.done();
-							this.$message({
-								message: '提交成功',
-								type: 'success'
-							});
-							this.$refs['addForm'].resetFields();
-							this.addFormVisible = false;
-							this.getUsers();
-						});
-					});
-				}
-			});
-		},*/
-		/*//批量删除
-		batchRemove: function () {
-			var ids = this.sels.map(item => item.id).toString();
-			this.$confirm('确认删除选中记录吗？', '提示', {
-				type: 'warning'
-			}).then(() => {
-				this.listLoading = true;
-				//NProgress.start();
-				let para = { ids: ids };
-				batchRemoveUser(para).then((res) => {
-					this.listLoading = false;
-					//NProgress.done();
-					this.$message({
-						message: '删除成功',
-						type: 'success'
-					});
-					this.getUsers();
-				});
-			}).catch(() => {});
-	    }*/
 	}
 }
 </script>
 
 <style scoped>
-.btn .el-button{
-	font-size: 16px;
-	border:0;
-	margin-right:-10px;
-	color:darkgray
- }
+	.btn .el-button{
+		font-size: 16px;
+		border:0;
+		margin-right:-10px;
+		color:darkgray
+	}
 	.btn .el-button:hover{
 		color:#20a0ff;
 	}

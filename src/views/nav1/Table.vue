@@ -92,7 +92,6 @@
 						<el-radio class="radio" :label="0">禁用</el-radio>
 					</el-radio-group>
 				</el-form-item>
-				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="addFormVisible = false">取消</el-button>
@@ -155,7 +154,7 @@ export default {
 		this.getUsers();
 	},
 	methods: {
-		formatActive: function (row, column) {
+		formatActive: function (row) {
 			return row.active == 1 ? '启用' :'禁用';
 		},
 		handleCurrentChange(val) {
@@ -171,11 +170,18 @@ export default {
 		async getUsersById() {
 			//this.listLoading = true;
 			const res = await getUsersById(this.filters.id);
-			if(res.code!=0){
+			if(res.code!==0 && this.filters.id !==""){
 				this.$message({
 					message: res.description,
 					type: 'error'
 				});
+				this.users=""
+			}else if(this.filters.id ==""){
+				this.$message({
+					message: "请输入用户ID",
+					type: 'error'
+				});
+				this.users=""
 			}else{
 				console.log(res)
 				let list = new Array();
@@ -184,36 +190,13 @@ export default {
 				console.log("users----"+users)
 				//this.users = users;
 				console.log(list);
-				this.users = list
+				this.users = list;
+				this.filters.id=""
 			}
-			/*var arr=[];
-			for(let i in res){
-				let o=res[i];
-				arr.push(o);
-			}
-			console.log(arr);*/
-			/*let self = [];
-			for(var i in res){
-				self.push(res[i]);
-			}
-			console.log(self);*/
-			/*this.users = res;
-			console.log("this.users"+this.users);*/
-			//console.log(res.list);
-			/*this.total = res.total;
-			let page = 1;
-			this.users = this.users.filter((u, index) => index < 20 * page && index >= 20 * (page - 1));
-			return new Promise((resolve, reject) => {
-				setTimeout(() => {
-					resolve([200, {
-						total: total,
-					}]);
-				}, 1000);
-			});*/
-			//console.log("this.users"+this.users);
 		},
 		//获取用户列表
 		async getUsers() {
+			this.listLoading = false;
 			const res = await getUsers();
 			this.users = res.list;
 			//this.listLoading = false;
@@ -247,11 +230,7 @@ export default {
 					message: '删除成功',
 					type: 'success'
 				});
-			}).catch(error => {
-				this.$message({
-					message: error.description,
-					type: 'success'
-				});
+			}).catch(() => {
 			})
 		},
 		//批量删除用户

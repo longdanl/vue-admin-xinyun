@@ -1,6 +1,7 @@
-import { login, logout, getUsers,getUsersId,addUser,editUsers,deleteUsers,deleteUsersIds } from '../../api/user'
+import { login, logout} from '../../api/user'
 import { getToken, setToken, removeToken } from '../../utils/auth'
 import router, { resetRouter } from '../../router'
+import qs from "qs"
 
 const state = {
   token: getToken(),
@@ -14,11 +15,10 @@ const state = {
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
-    //console.log('state.token哈哈'+state.token)
   },
-  SET_USER: (state, user) => {
+ /* SET_USER: (state, user) => {
     state.user = user
-  },
+  },*/
   /*SET_ID: (state, id) => {
     state.id = id
   },
@@ -59,109 +59,14 @@ const actions = {
       })
     })
   },
-/* //添加用户
-  addUser({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      addUser(state.token).then(response => {
-        const { data } = response
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
-
-        const { roles, name, avatar, introduction } = data;
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles);
-        commit('SET_NAME', name);
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction);
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
-  //用户查询id
-  getUsersId({ commit, state },userInfo) {
-    const { id } = userInfo;
-    return new Promise((resolve, reject) => {
-      getUsersId(state.token).then(response => {
-        const { data } = response
-
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
-
-        const { id, username, active, user_lable } = data.list
-        const { total,code } = data
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },*/
-  /*//获取用户
-  getUsers({ commit},username) {
-    return new Promise((resolve, reject) => {
-      getUsers(username).then(response => {
-        const { list,total,code,description } = response
-        const users = list;
-        if (code === !0) {
-          reject('请求失败');
-          this.$message({
-            message:description,
-            type:'success'
-          })
-        }
-        if (!username || username.length <= 0) {
-          reject('暂无数据');
-          this.$message({
-            message:description,
-            type:'success'
-          })
-        }
-        for(i=0;i<users.length;i++){
-          let user = users[i];
-          commit('SET_USER', user);
-         /!* let username = users[i].username;
-          let id = users[i].id;
-          let active = users[i].active;
-          let phone = users[i].phone;
-          let email = users[i].email;*!/
-         /!* commit('SET_ID', id);
-          commit('SET_USERNAME', username);
-          commit('SET_ACTIVE', active);
-          commit('SET_PHONE', phone);
-          commit('SET_EMAIL', email);
-          commit('SET_USERS', users);*!/
-        }
-        resolve(response)
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },*/
-
   // 登出
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
+      console.log("state"+state.token);
+      logout(qs.stringify({"access_token":state.token})).then(() => {
         console.log('注销好了'+state.token);
         commit('SET_TOKEN', '');
-        commit('SET_ROLES', []);
+        console.log('token-----'+state.token);
         removeToken();
         resetRouter();
         resolve()
@@ -170,7 +75,6 @@ const actions = {
       })
     })
   },
-
   /*// remove token
   resetToken({ commit }) {
     return new Promise(resolve => {

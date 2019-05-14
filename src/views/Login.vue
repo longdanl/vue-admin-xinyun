@@ -27,8 +27,6 @@
   //导入自己封装的axios：
   import request from '../utils/request';
   import qs from 'qs';
-
-
   export default {
     data() {
       return {
@@ -90,75 +88,6 @@
             return false;
           }
         });
-            //NProgress.start();
-            //var loginParams = { username: this.ruleForm2.account, password: this.ruleForm2.checkPass };
-            //var loginParams = {  username:this.ruleForm2.account.valueOf('admin'), password:this.ruleForm2.account.valueOf('admin') };
-           /* request({
-              //url: '/api/oauth/token',
-              url: '/api/login',
-              method: 'post',
-
-              //contentType: 'application/json;charset=utf-8',
-              //data: loginParams
-
-              //如果请求过去，且参数携带均正常，考虑是接口支持的数据格式问题（form/json）
-              //data: qs.stringify(loginParams)
-              data:loginParams,
-              auth: {
-                username: 'test',
-                password: 'test'
-              }
-            }).then(resData => {
-              console.log(resData);
-              let { code,access_token,refresh_token,token_type,scope,expires_in } = resData;
-              //const token = access_token;
-              let user = {access_token:access_token,token_type:token_type,refresh_token:refresh_token,expires_in:expires_in,scope:scope};
-              //console.log(user_info);
-              if (code === 0) {
-                _this.$message({
-                  message:'登录成功',
-                  type:'success'
-                });
-                //console.log(token)
-                //存储token
-               // localStorage.setItem('eleToken',token);
-                // 存储到vuex
-                //this.$store.dispatch("setAuthorization", !this.isEmpty(token));
-               // this.$store.dispatch("setsuer",token);
-                sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/table' });
-              }else{
-                _this.$message({
-                  message:'用户名或密码错误',
-                  type:'error'
-                });
-              }
-            });*/
-
-            /*}).catch(err => {
-              console.log("error");
-            })*/
-            //var loginParams = {  grant_type: "refresh_token", refresh_token: "2e0fa44b-0a62-4f4e-9132-88b8bc469588" };
-           /* request({
-              url: '/api/oauth/token',
-              method: 'post',
-
-              //contentType: 'application/json;charset=utf-8',
-              //data: loginParams
-
-              //如果请求过去，且参数携带均正常，考虑是接口支持的数据格式问题（form/json）
-              //data: qs.stringify(loginParams)
-              data:qs.stringify(loginParams),
-              auth: {
-                username: 'test',
-                password: 'test'
-              }
-            }).then(resData => {
-              console.log(resData);
-
-            }).catch(err => {
-              console.log("error");
-            })*/
       }
     }
   }
