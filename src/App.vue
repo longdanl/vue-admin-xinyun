@@ -12,10 +12,32 @@ import request from './utils/request';
 import qs from 'qs';
 export default {
 	name: 'app',
+	data () {
+		return {
+			timer: 0
+		}
+	},
 	computed:{
 		key(){
 			return this.$route.path + Math.random();
 		}
+	},
+	//模块初始化时打开定时器，1.5小时后刷新token
+	created () {
+		let refresh_token = JSON.parse(localStorage.getItem('refresh_token'));
+		this.timer = setInterval(() => {
+			this.$store.dispatch('refresh/refresh', refresh_token)
+					.then(() => {
+						console.log('刷新成功')
+					})
+					.catch(() => {
+						console.log('刷新失败')
+					});
+		}, 5400000)
+	},
+//销毁前清除定时器
+	beforeDestroy () {
+		clearInterval(this.timer)
 	},
 	methods: {
 		OperatingWebsite() {
@@ -35,67 +57,6 @@ export default {
 				});
 			} else {
 				this.currentTime = new Date().getTime();
-				//let refresh_token = JSON.parse(localStorage.getItem('refresh_token'));
-				//console.log('刷新refresh_token:'+refresh_token);
-				//var loginParams = {  grant_type: "refresh_token", refresh_token:refresh_token  };
-				/*request({
-                   url: '/api/oauth/token',
-                   method: 'post',
-
-                   //contentType: 'application/json;charset=utf-8',
-                   //data: loginParams
-
-                   //如果请求过去，且参数携带均正常，考虑是接口支持的数据格式问题（form/json）
-                   //data: qs.stringify(loginParams)
-                   data:qs.stringify(loginParams),
-                   auth: {
-                     username: 'test',
-                     password: 'test'
-                   }
-                 }).then(resData => {
-                   console.log(resData);
-
-                 }).catch(err => {
-                   console.log("error");
-                 })*/
-				/*this.$store.dispatch('refresh/refresh', refresh_token)
-						.then(() => {
-							console.log('刷新成功')
-						})
-						.catch(() => {
-							console.log('刷新失败')
-						});*/
-				/*let user = JSON.parse(sessionStorage.getItem('user'));
-				console.log('1.'+user)
-				let token = user.refresh_token;
-				console.log(token)
-				var loginParams = {  grant_type: "refresh_token", refresh_token: token };*/
-				/* request({
-                   url: '/api/oauth/token',
-                   method: 'post',
-
-                   //contentType: 'application/json;charset=utf-8',
-                   //data: loginParams
-
-                   //如果请求过去，且参数携带均正常，考虑是接口支持的数据格式问题（form/json）
-                   //data: qs.stringify(loginParams)
-                   data:qs.stringify(loginParams),
-                   auth: {
-                     username: 'test',
-                     password: 'test'
-                   }
-                 }).then(resData => {
-                   console.log(resData);
-					 console.log('2.'+user);
-					 let { code,access_token,refresh_token,token_type,scope,expires_in } = resData;
-					 //const token = access_token;
-					 let user = {access_token:access_token,token_type:token_type,refresh_token:refresh_token,expires_in:expires_in,scope:scope};
-					 //console.log(user_info);
-					 console.log('user.'+user)
-                     sessionStorage.setItem('user', JSON.stringify(user));
-                 }).catch(err => {
-                   console.log("error");
-                 })*/
 			}
 		}
 	},

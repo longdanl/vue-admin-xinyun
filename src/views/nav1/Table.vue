@@ -18,7 +18,7 @@
 			</el-form>
 		</el-col>
 		<!--列表-->
-		<el-table align:="center" :data="users" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 74%;">
+		<el-table border stripe align:="center" :data="users" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 74%;">
 			<el-table-column type="selection" width="55">
 			</el-table-column>
 			<el-table-column prop="username" label="用户名" width="200">
@@ -31,7 +31,7 @@
 			</el-table-column>
 			<el-table-column prop="active" label="当前状态" width="200px" :formatter="formatActive" sortable>
 			</el-table-column>
-			<el-table-column label="操作" width=184 class="showBtn">
+			<el-table-column label="操作" width=186 class="showBtn">
 				<template scope="scope">
 					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
@@ -293,17 +293,30 @@ export default {
 			};
 		},
 		//新增用户
-		async addUsers() {
-			const res = await addUsers(this.addForm);
-			this.$message({
-				message: '提交成功',
-				type: 'success'
-			});
-			this.addFormVisible = false;
-			this.addLoading = false;
-			this.$refs['addForm'].resetFields();
-			console.log(res);
-			this.getUsers();
+		async addUsers(row) {
+			let temp = /^[\w.\-]+@(?:[a-z0-9]+(?:-[a-z0-9]+)*\.)+[a-z]{2,3}$/
+			if(!this.addForm.username){
+				this.$message({
+					message: '请输入用户信息及选定当前状态',
+					type: 'error'
+				});
+			}else if (this.addForm.email && (!(temp).test(this.addForm.email))) {
+				this.$message({
+					message: '请输入正确的邮箱',
+					type: 'error'
+				});
+			}else{
+				const res = await addUsers(this.addForm);
+				this.$message({
+					message: '提交成功',
+					type: 'success'
+				});
+				this.addFormVisible = false;
+				this.addLoading = false;
+				this.$refs['addForm'].resetFields();
+				console.log(res);
+				this.getUsers();
+			}
 		},
 		/*//编辑
 		editSubmit: function () {

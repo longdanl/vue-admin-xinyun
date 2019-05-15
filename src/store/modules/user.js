@@ -44,8 +44,7 @@ const actions = {
     const { username, password } = userInfo;
     return new Promise((resolve, reject) => {
       login({ username: username, password: password }).then(response => {
-        console.log('登录好了')
-        console.log('2552255'+response.data);
+        console.log('登录成功');
         let { code,access_token,refresh_token,token_type,scope,expires_in } = response;
         let user = {access_token:access_token,token_type:token_type,refresh_token:refresh_token,expires_in:expires_in,scope:scope};
         sessionStorage.setItem('user', JSON.stringify(user));

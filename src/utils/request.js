@@ -18,9 +18,9 @@ service.interceptors.request.use(
     //先读取cookies，然后设置到store中：
     config.headers['X-Token'] = getToken();
    }*/
-  if (store.state.token) {
+  if (getToken()) {
      // console.log('store.token-----'+store.state.token);
-      config.headers.Authorization = `Bearer ${store.state.token}`
+      config.headers.Authorization = `Bearer ${getToken()}`
   }
 return config
 },
