@@ -11,8 +11,8 @@ import Vuex from 'vuex'
 //import NProgress from 'nprogress'
 //import 'nprogress/nprogress.css'
 import router from './router'
-//import Mock from './mock'
-//Mock.bootstrap();
+import Mock from './mock'
+Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
 import vueztree from 'vue-ztree-2.0/dist/vue-ztree-2.0.umd.min.js'
 import 'vue-ztree-2.0/dist/vue-ztree-2.0.css'

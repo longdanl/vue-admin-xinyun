@@ -5,11 +5,10 @@ import { getToken } from '../utils/auth'
 
 const service = axios.create({
   //TODO：以后这里需要做多环境处理
-  baseURL: 'http://localhost:8081',
+  baseURL: 'http://localhost:8822',
   withCredentials: true,
   timeout: 5000
 });
-
 // request interceptor
 service.interceptors.request.use(
   config => {

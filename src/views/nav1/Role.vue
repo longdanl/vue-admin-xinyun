@@ -18,9 +18,8 @@
 				</el-form-item>
 			</el-form>
 		</el-col>
-
 		<!--列表-->
-		<el-table align:="center" :data="roles" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 78%;">
+		<el-table align:="center" :data="roles" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 74%;">
 			<el-table-column prop="name" label="角色名称" width="300" sortable>
 			</el-table-column>
 			<el-table-column prop="addTime" label="创建时间" width="300" sortable>
@@ -66,7 +65,7 @@
 
 <script>
 import util from '../../common/js/util'
-import { getRolesPage, removeRole, editRole, addRole } from '../../api/api';
+import { getRoles, removeRole, editRole, addRole } from '@/api/roles';
 export default {
 	data() {
 		return {
@@ -115,21 +114,23 @@ export default {
 			this.getRoles();
 		},
 		//获取角色列表
-		getRoles() {
-			let para = {
-				page: this.page,
-				name: this.role.name
-			};
-			//this.listLoading = true;
+		async getRoles() {
 			this.listLoading = false;
-			getRolesPage(para).then((res) => {
-				this.total = res.data.total;
-				this.roles = res.data.roles;
-				this.listLoading = false;
-				if(roles === ""){
-					this.listLoading = false
-				}
-			});
+			const res = await getRoles();
+			console.log(res)
+			this.roles = res.list;
+			//this.listLoading = false;
+			/*this.total = res.total;
+			let page = 1;
+			this.users = this.users.filter((u, index) => index < 20 * page && index >= 20 * (page - 1));
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve([200, {
+						total: total,
+					}]);
+				}, 1000);
+			});*/
+			//console.log("this.users"+this.users);
 		},
 		//删除
 		handleDel: function (index, row) {

@@ -16,14 +16,14 @@ const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
   },
+  SET_USERNAME: (state, username) => {
+    state.username = username
+  },
  /* SET_USER: (state, user) => {
     state.user = user
   },*/
   /*SET_ID: (state, id) => {
     state.id = id
-  },
-  SET_USERNAME: (state, username) => {
-    state.username = username
   },
   SET_ACTIVE: (state, active) => {
     state.active = active
@@ -46,10 +46,11 @@ const actions = {
       login({ username: username, password: password }).then(response => {
         console.log('登录成功');
         let { code,access_token,refresh_token,token_type,scope,expires_in } = response;
-        let user = {access_token:access_token,token_type:token_type,refresh_token:refresh_token,expires_in:expires_in,scope:scope};
+        let user = {username,access_token:access_token,token_type:token_type,refresh_token:refresh_token,expires_in:expires_in,scope:scope};
         sessionStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('refresh_token',JSON.stringify(refresh_token));
         commit('SET_TOKEN', access_token);
+        commit('SET_USERNAME', username);
         setToken(access_token);
         resolve();
       }).catch(error => {

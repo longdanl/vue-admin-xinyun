@@ -1,36 +1,22 @@
 <template>
 	<section>
-		<!--工具条-->
-		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-			<el-form :inline="true" :model="filters">
-				<el-form-item>
-					<i class="fa fa-music" aria-hidden="true" style="color: royalblue">&nbsp;<strong style="color: royalblue">音频文件</strong></i>
-				</el-form-item>
-				<el-form-item>
-					<el-button size="small" @click="handleMusic">导入音频</el-button>
-				</el-form-item>
-				<el-form-item class="btn" style="float: right">
-					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
-				</el-form-item>
-			</el-form>
-		</el-col>
 		<!--彩铃列表-->
 		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="users" v-loading="listLoading" style="width: 70%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
-			<el-table-column prop="username" label="文件名" width="200">
+			<el-table-column prop="phone" label="被叫号码" width="200">
 			</el-table-column>
-			<el-table-column prop="phone" label="文件大小"  width="200">
+			<el-table-column prop="username" label="音频文件ID"  width="200">
 			</el-table-column>
-			<el-table-column prop="email" label="上传时间" width="220">
+			<el-table-column prop="username" label="视频文件ID"  width="200">
 			</el-table-column>
 			<el-table-column prop="see" label="预览" width="160">
 			</el-table-column>
-			<el-table-column prop="remarks" label="备注" width="168">
+			<el-table-column prop="phone" label="主叫号码" width="168">
 			</el-table-column>
-			<el-table-column label="操作" width=170 class="showBtn">
+			<el-table-column label="操作" width=190 class="showBtn">
 				<template scope="scope">
-					<el-button size="small" type="primary" @click="handleSet(scope.$index, scope.row)">设置</el-button>
+					<el-button size="small" type="primary" @click="handleSet(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="success" size="small" @click="handleChoose(scope.row)">选择</el-button>
 				</template>
 			</el-table-column>

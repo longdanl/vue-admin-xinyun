@@ -19,7 +19,7 @@
 				<i class="fa fa-envelope" aria-hidden="true" style="font-size: 24px;color: white;margin-right: 10px"><el-badge is-dot class="item"></el-badge></i>
 				<el-dropdown trigger="click">
 					<el-dropdown trigger="hover">
-						<span class="el-dropdown-link userinfo-inner"><img src="../assets/user.png" />系统管理员</span>
+						<span class="el-dropdown-link userinfo-inner"><img src="../assets/user.png" />{{username}}</span>
 						<el-dropdown-menu slot="dropdown">
 							<el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
 						</el-dropdown-menu>
@@ -84,7 +84,7 @@ export default {
 	data () {
 		return {
 			defaultActiveIndex: "0",
-			nickname: '',
+			username: '',
 			collapsed: false,
 			sysName:'XINYUN'
 		}
@@ -124,8 +124,8 @@ export default {
 		var user = sessionStorage.getItem('user');
 		if (user) {
 			user = JSON.parse(user);
-			this.sysUserName = user.name || '';
-			this.sysUserAvatar = user.avatar || '';
+			this.username = user.username || '';
+			/*this.sysUserAvatar = user.avatar || '';*/
 		}
 	}
 }

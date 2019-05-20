@@ -31,7 +31,7 @@
 		</el-col>
 		<!--列表-->
 		<template>
-			<el-table :data="list" highlight-current-row v-loading="listLoading"  @selection-change="selsChange" style="width:100%;">
+			<el-table :data="list" highlight-current-row v-loading="listLoading"  @selection-change="selsChange" style="width:96%;">
 				<el-table-column width="60">
 					<i class="fa fa-plus-circle" style="font-size:20px;color:green"></i>
 				</el-table-column>
@@ -53,7 +53,7 @@
 				</el-table-column>
 				<el-table-column prop="alarmEnd" label="告警结束时间" width="200px">
 				</el-table-column>
-				<el-table-column label="操作" width="310" class="showBtn">
+				<el-table-column label="操作" width="330" class="showBtn">
 					<template scope="scope">
 						<el-button size="small" type="primary"><i class="fa fa-info" aria-hidden="true" style="font-size:15px;"></i>&nbsp;查看日志</el-button>
 					</template>

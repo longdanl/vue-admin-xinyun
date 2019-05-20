@@ -14,6 +14,7 @@ import Role from '../views/nav1/Role.vue'
 import Resource from '../views/nav1/Resource.vue'
 import Echarts from '../views/charts/Echarts.vue'
 import Files1 from '../views/files/Files1'
+import PhoneFiles1 from '../views/files/PhoneFiles1'
 
 export const constantRoutes = [
     {
@@ -54,11 +55,12 @@ export const constantRoutes = [
     {
         path: '/',
         component: Home,
-        name: '文件管理',
+        name: '10086文件管理',
         iconCls:'fa fa-folder',//图标样式class
         menuShow: true,
         children: [
-            { path: '/files1', component: Files1, name: '10086文件管理',menuShow: true},
+            { path: '/files1', component: Files1, name: '文件管理',menuShow: true},
+            { path: '/phoneFiles1', component: PhoneFiles1, name: '号码管理',menuShow: true},
         ]
     },
     {

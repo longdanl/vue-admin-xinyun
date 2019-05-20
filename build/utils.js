@@ -37,6 +37,8 @@ exports.cssLoaders = function (options) {
     if (options.extract) {
       return ExtractTextPlugin.extract({
         use: loaders,
+        //解决背景图片找不到
+        publicPath:'../../',
         fallback: 'vue-style-loader'
       })
     } else {
