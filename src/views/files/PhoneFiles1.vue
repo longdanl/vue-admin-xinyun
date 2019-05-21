@@ -1,23 +1,42 @@
 <template>
 	<section>
 		<!--彩铃列表-->
-		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="users" v-loading="listLoading" style="width: 70%;">
+		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="phoneList" v-loading="listLoading" style="width: 70%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
-			<el-table-column prop="phone" label="被叫号码" width="200">
+			<el-table-column prop="call_phone" label="被叫号码" width="200">
 			</el-table-column>
-			<el-table-column prop="username" label="音频文件ID"  width="200">
+			<el-table-column prop="arbt" label="音频文件"  min-width="200" @click="handleEdit">
+				<editable-cell
+						slot-scope="{row}"
+						editable-component="el-select"
+						:can-edit="editModeEnabled"
+						close-event="change"
+						v-model="row.arbt">
+					<el-tag size="medium"
+							slot="content">
+						{{row.arbt === '音频1' ? '音频1': '音频2'}}
+					</el-tag>
+					<template slot="edit-component-slot">
+						<el-option value="音频1" label="音频1"></el-option>
+						<el-option value="视频1" label="音频2"></el-option>
+					</template>
+				</editable-cell>
 			</el-table-column>
-			<el-table-column prop="username" label="视频文件ID"  width="200">
+			<el-table-column prop="vrbt" label="视频文件"  width="200">
+				<editable-cell :show-input="row.editMode" slot-scope="{row}" v-model="row.vrbt">
+					<span slot="content">{{row.vrbt}}</span>
+				</editable-cell>
 			</el-table-column>
-			<el-table-column prop="see" label="预览" width="160">
+			<el-table-column prop="seeIt" label="预览" width="160" class="isPlaying">
+				<i class="fa fa-play-circle-o" style='font-size: 24px;' v-show="playing"></i>
+				<i class="fa fa-pause-circle-o" style='font-size: 24px;' v-show="!playing"></i>
 			</el-table-column>
 			<el-table-column prop="phone" label="主叫号码" width="168">
 			</el-table-column>
 			<el-table-column label="操作" width=190 class="showBtn">
 				<template scope="scope">
-					<el-button size="small" type="primary" @click="handleSet(scope.$index, scope.row)">编辑</el-button>
-					<el-button type="success" size="small" @click="handleChoose(scope.row)">选择</el-button>
+					<el-button type="danger" size="small" @click="handleChoose(scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -26,53 +45,6 @@
 			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
 			</el-pagination>
 		</el-col>
-		<!--设置界面-->
-		<el-dialog title="主叫列表" v-model="setFormVisible" :close-on-click-modal="false">
-			<el-button type="primary" size="small" @click="handleAdd" style="margin-bottom: 10px">新增</el-button>
-			<!--主叫列表-->
-			<el-table show-overflow-tooltip="true" height="400" border align:="center" :data="users" highlight-current-row v-loading="listLoading" style="width: 100%;">
-				<el-table-column prop="username" label="用户名" width="300">
-				</el-table-column>
-				<el-table-column prop="phone" label="手机号码"  width="300">
-				</el-table-column>
-				<el-table-column label="操作" width=280 class="showBtn">
-					<template scope="scope">
-						<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-						<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
-					</template>
-				</el-table-column>
-			</el-table>
-		</el-dialog>
-		<!--上传音频界面-->
-		<el-dialog title="导入音频" v-model="uploadFormVisible" :close-on-click-modal="false">
-			<el-form :model="uploadForm" label-width="80px" ref="uploadForm">
-				<el-form-item label="备注">
-					<el-input v-model="uploadForm.remark"></el-input>
-				</el-form-item>
-				<el-upload
-						class="upload-demo"
-						ref="upload"
-						action="https://jsonplaceholder.typicode.com/posts/"
-						:on-preview="handlePreview"
-						:file-list="fileList"
-						:auto-upload="false">
-					<el-button slot="trigger" size="small" type="primary">选择文件</el-button>
-					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传文件</el-button>
-					<div slot="tip" class="el-upload__tip">（只能上传 wav / amr 文件）</div>
-				</el-upload>
-				<!--<el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" :on-change="handleChange" :file-list="fileList">
-					<el-button size="small" type="primary">点击上传</el-button>
-					<div slot="tip" class="el-upload__tip">（只能上传 wav / amr 文件）</div>
-				</el-upload>
-				<el-form-item label="备注">
-					<el-input style="margin-right: -20px" v-model="uploadForm.remark"></el-input>
-				</el-form-item>-->
-			</el-form>
-			<div slot="footer" class="dialog-footer">
-				<el-button @click.native="uploadFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="addUsers" :loading="uploadLoading">确定</el-button>
-			</div>
-		</el-dialog>
 		<!--主叫号码编辑界面-->
 		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
 			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
@@ -88,34 +60,37 @@
 				<el-button type="primary" @click.native="updateUsers" :loading="editLoading">提交</el-button>
 			</div>
 		</el-dialog>
-		<!--新增主叫号码界面-->
-		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
-			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="用户名" prop="name">
-					<el-input v-model="addForm.username" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="手机号码">
-					<el-input v-model="addForm.phone"></el-input>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer">
-				<el-button @click.native="addFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="addUsers" :loading="addLoading">提交</el-button>
-			</div>
-		</el-dialog>
 	</section>
 </template>
 
 <script>
 import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById} from '@/api/users'
+import EditableCell from "../../components/EditableCell.vue";
 export default {
+	components: {
+		EditableCell
+	},
 	data() {
 		return {
-			filters: {
-				id: ''
-			},
-			fileList: [],
-			users: [],
+			editModeEnabled: true,
+			phoneList:[
+				{
+					call_phone:'',
+					arbt:'音频1',
+					vrbt:'视频1',
+					phone:'17624203889',
+					is_default:1
+				},
+				{
+					call_phone:'10099',
+					arbt:'音频2',
+					vrbt:'视频2',
+					phone:'17624203889',
+					is_default:0
+				},
+			],
+            playing:true,
+			is_default:false,
 			total: 0,
 			page: 1,
 			listLoading: false,
@@ -157,6 +132,14 @@ export default {
 	created() {
 		//this.listLoading=true;
 		this.getUsers();
+	},
+	mounted() {
+		this.gridData = this.gridData.map(row => {
+			return {
+				...row,
+				editMode: false
+			};
+		});
 	},
 	methods: {
 		formatActive: function (row) {
@@ -266,46 +249,6 @@ export default {
 				phone: "",
 			};
 		},
-		//显示上传音频界面
-		handleMusic: function () {
-			this.uploadFormVisible = true;
-			this.uploadForm = {
-				remark:''
-			};
-		},
-		//上传音频
-		submitUpload() {
-			if(this.fileList.length>0){
-				this.$confirm('确认上传该音频吗?', '提示', {
-					type: 'warning'
-				}).then(() => {
-					this.$refs.upload.submit();
-					this.$message({
-						message: '上传成功',
-						type: 'success'
-					});
-					this.$refs.upload.clearFiles();
-				}).catch(() => {
-					this.$message({
-						message: '取消上传',
-						type: 'warning'
-					});
-				})
-			}else{
-				this.$message({
-					message: '请选择上传的文件',
-					type: 'error'
-				});
-				this.fileList.length+=1
-			}
-
-		},
-		/*handleRemove(file, fileList) {
-			console.log(file, fileList);
-		},*/
-		handlePreview(file) {
-			console.log(file);
-		},
 		//新增用户
 		async addUsers() {
 				const res = await addUsers(this.addForm);
@@ -343,7 +286,6 @@ export default {
 	}
 }
 </script>
-
 <style scoped>
 	.btn .el-button{
 		font-size: 16px;
@@ -357,5 +299,13 @@ export default {
 	.el-table .success-row {
 		background: red;
 
+	}
+	.isPlaying .fa{
+		font-size: 40px;
+		color: red;
+	}
+	.edit-cell {
+		min-height: 35px;
+		cursor: pointer;
 	}
 </style>

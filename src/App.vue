@@ -33,7 +33,7 @@ export default {
 					.catch(() => {
 						console.log('刷新失败')
 					});
-		}, 5400000)
+		}, 3600000);
 	},
 //销毁前清除定时器
 	beforeDestroy () {

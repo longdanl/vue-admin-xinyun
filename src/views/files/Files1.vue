@@ -2,33 +2,21 @@
 	<section>
 		<!--文件列表-->
 		<div style="padding-top: 10px"></div>
-		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="users" v-loading="listLoading" style="width: 100%;">
+		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="files" v-loading="listLoading" style="width: 69%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
-			<el-table-column prop="username" label="文件ID" width="200">
+			<el-table-column prop="memo" label="文件名" width="220">
 			</el-table-column>
-			<el-table-column prop="phone" label="文件类型"  width="100">
+			<el-table-column prop="type" label="文件类型"  width="120">
 			</el-table-column>
-			<el-table-column prop="email" label="文件格式" width="100">
+			<el-table-column prop="upload_timestamp" label="上传时间" width="200">
 			</el-table-column>
-			<el-table-column prop="remarks" label="备注" width="168">
+			<el-table-column prop="username" label="用户名" width="200">
 			</el-table-column>
-			<el-table-column prop="email" label="文件名" width="220">
+			<el-table-column prop="is_default" label="设置默认彩铃" width="200">
 			</el-table-column>
-			<el-table-column prop="email" label="上传时间" width="204">
-			</el-table-column>
-			<el-table-column prop="email" label="用户ID" width="200">
-			</el-table-column>
-			<el-table-column prop="email" label="使用" width="100">
-			</el-table-column>
-			<el-table-column prop="email" label="主叫号码" width="160">
+			<el-table-column prop="calling_numbers" label="主叫号码" width="162">
 				17624203889;...
-			</el-table-column>
-			<el-table-column label="操作" width=170 class="showBtn">
-				<template scope="scope">
-					<el-button type="primary" size="small">选择</el-button>
-					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
-				</template>
 			</el-table-column>
 		</el-table>
 		<!--工具条-->
@@ -39,9 +27,9 @@
 		</el-col>
 		<!--上传界面-->
 		<el-dialog title="上传音频/视频" v-model="addFormVisible" :close-on-click-modal="false">
-			<el-form :model="addForm" label-width="80px" ref="addForm">
-				<el-form-item label="备注" prop="remarks">
-					<el-input v-model="addForm.remarks" auto-complete="off"></el-input>
+			<!--<el-form :model="addForm" label-width="80px" ref="addForm">
+				<el-form-item label="文件名" prop="remarks">
+					<el-input v-model="addForm.memo" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="文件类型">
 					<el-radio-group v-model="addForm.type">
@@ -53,17 +41,21 @@
 			<el-upload
 					class="upload-demo"
 					ref="upload"
-					:data="addForm"
-					action="https://jsonplaceholder.typicode.com/posts/"
+					action="http://172.16.10.66:8080/crbt/10086/files"
 					:on-preview="handlePreview"
 					:on-remove="handleRemove"
 					:beforeUpload="beforeAvatarUpload"
 					:file-list="fileList"
 					:auto-upload="false">
-				<el-button slot="trigger" type="primary">选取文件</el-button>
+				<el-button slot="trigger" type="primary" v-model="addForm.file">选取文件</el-button>
 				<el-button style="margin-left: 10px;" type="success" @click="submitUpload">上传到服务器</el-button>
 				<div slot="tip" class="el-upload__tip">只能上传3gp、wav、amr文件</div>
-			</el-upload>
+			</el-upload>-->
+			<form>
+				<input type="text" value="" v-model="memo" placeholder="请输入文件名">
+				<input type="file" @change="getFile($event)">
+				<button @click="submit($event)">提交</button>
+			</form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="addFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="addFormVisible = false">确定</el-button>
@@ -73,14 +65,13 @@
 </template>
 <script>
 import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById} from '@/api/users'
+import { upload,getFiles} from '@/api/crbt'
 export default {
 	data() {
 		return {
-			filters: {
-				id: ''
-			},
-			fileList: [],
-			users: [],
+			file: '',
+			memo:'',
+			files: [],
 			total: 0,
 			page: 1,
 			listLoading: false,
@@ -103,19 +94,32 @@ export default {
 			addLoading: false,
 			//上传界面数据
 			addForm: {
-				remarks:'',
-				type:''
+				memo:'',
+				type:'',
+				file:''
 			},
 		}
 	},
 	created() {
 		//this.listLoading=true;
-		this.getUsers();
+		this.getFiles();
 	},
 	methods: {
-		//查看主叫列表
-		showPhoneList(){
-            this.showFormVisible = true
+		getFile(event) {
+			this.file = event.target.files[0];
+			console.log(this.file);
+		},
+		async submit(event) {
+			console.log('文件'+this.file);
+			event.preventDefault();//取消默认行为
+			//创建 formData 对象
+			let formData = new FormData();
+			// 向 formData 对象中添加文件
+			formData.append('file',this.file);
+			formData.append('memo',this.memo);
+			await upload(formData).then(function (response) {
+				console.log("res: ",response);
+			})
 		},
 		// 上传前对文件的大小的判断
 		beforeAvatarUpload (file) {
@@ -137,8 +141,10 @@ export default {
 		submitUpload() {
 			this.$confirm('确认上传该文件吗?', '提示', {
 				type: 'warning'
-			}).then(()=> {
+			}).then(async()=> {
 				this.$refs.upload.submit();
+				const res = await upload(this.addForm);
+				console.log(res);
 				this.$refs.upload.clearFiles();
 			}).catch(err => {
 				this.$message({
@@ -167,10 +173,11 @@ export default {
 			this.getUsers();
 		},
 		//获取用户列表
-		async getUsers() {
+		async getFiles() {
 			this.listLoading = false;
-			const res = await getUsers();
-			this.users = res.list;
+			const res = await getFiles();
+			console.log(res+'---------');
+			this.files = res.list;
 		},
 		handleRowChange(val) {
 			this.currentRow = val;
