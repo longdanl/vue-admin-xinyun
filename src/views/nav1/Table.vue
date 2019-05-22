@@ -217,6 +217,7 @@ export default {
 		},
 		//删除用户
 		handleDel(index, row) {
+			console.log(row.id)
 			let para = {id: row.id};
 			console.log(para.id)
 			this.$confirm('确认删除该记录吗?', '提示', {

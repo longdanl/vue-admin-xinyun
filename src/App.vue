@@ -22,7 +22,7 @@ export default {
 			return this.$route.path + Math.random();
 		}
 	},
-	//模块初始化时打开定时器，1.5小时后刷新token
+	/*//模块初始化时打开定时器，1.5小时后刷新token
 	created () {
 		let refresh_token = JSON.parse(localStorage.getItem('refresh_token'));
 		this.timer = setInterval(() => {
@@ -33,8 +33,8 @@ export default {
 					.catch(() => {
 						console.log('刷新失败')
 					});
-		}, 3600000);
-	},
+		}, 600000);
+	},*/
 //销毁前清除定时器
 	beforeDestroy () {
 		clearInterval(this.timer)
