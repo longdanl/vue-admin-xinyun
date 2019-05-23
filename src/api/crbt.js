@@ -6,7 +6,14 @@ export function getFiles() {
         method: 'get'
     })
 }
-
+//查询文件
+export function getFileByMemo(data) {
+    return request({
+       // url: '/api/crbt/10086/files',
+        url: '/api/crbt/10086/files?search='+data,
+        method: 'get',
+    })
+}
 //下载文件
 export function downloadFiles(filename) {
     return request({

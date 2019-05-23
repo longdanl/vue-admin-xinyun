@@ -74,10 +74,10 @@
 		<!--新增界面-->
 		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="用户名" prop="name">
+				<el-form-item label="用户名" prop="username">
 					<el-input v-model="addForm.username" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="用户密码">
+				<el-form-item label="用户密码" prop="password">
 					<el-input v-model="addForm.password"></el-input>
 				</el-form-item>
 				<el-form-item label="手机号码">
@@ -86,7 +86,7 @@
 				<el-form-item label="用户邮箱">
 					<el-input v-model="addForm.email"></el-input>
 				</el-form-item>
-				<el-form-item label="当前状态">
+				<el-form-item label="当前状态" prop="active">
 					<el-radio-group v-model="addForm.active">
 						<el-radio class="radio" :label="1">启用</el-radio>
 						<el-radio class="radio" :label="0">禁用</el-radio>
@@ -135,7 +135,13 @@ export default {
 			addFormRules: {
 				username: [
 					{required: true, message: '请输入用户名', trigger: 'blur'}
-				]
+				],
+				password: [
+					{required: true, message: '请输入用户名', trigger: 'blur'}
+				],
+				active: [
+					{required: true, message: '请输入用户名', trigger: 'blur'}
+				],
 			},
 			//新增界面数据
 			addForm: {
@@ -144,7 +150,7 @@ export default {
 				password:'',
 				phone: "",
 				email: '',
-				active: "",
+				active:''
 			}
 
 		}
@@ -220,19 +226,21 @@ export default {
 			console.log(row.id)
 			let para = {id: row.id};
 			console.log(para.id)
-			this.$confirm('确认删除该记录吗?', '提示', {
-				type: 'warning'
-			}).then(async() => {
-				await deleteUsers(para.id);
-				this.listLoading = false;
-				this.editFormVisible = false;
-				this.users.splice(index, 1);
-				this.$message({
-					message: '删除成功',
-					type: 'success'
-				});
-			}).catch(() => {
-			})
+			if(row.username!=='admin'){
+				this.$confirm('确认删除该记录吗?', '提示', {
+					type: 'warning'
+				}).then(async() => {
+					await deleteUsers(para.id);
+					this.listLoading = false;
+					this.editFormVisible = false;
+					this.users.splice(index, 1);
+					this.$message({
+						message: '删除成功',
+						type: 'success'
+					});
+				}).catch(() => {
+				})
+			}
 		},
 		//批量删除用户
 		deleteUsersBatch() {
@@ -290,8 +298,9 @@ export default {
 				password:'',
 				phone: "",
 				email: '',
-				active: "",
+				active: 1,
 			};
+			console.log(this.addForm.id)
 		},
 		//新增用户
 		async addUsers(row) {
@@ -319,75 +328,6 @@ export default {
 				this.getUsers();
 			}
 		},
-		/*//编辑
-		editSubmit: function () {
-
-			this.$refs.editForm.validate((valid) => {
-				if (valid) {
-					this.$confirm('确认提交吗？', '提示', {}).then(() => {
-						this.editLoading = true;
-						//NProgress.start();
-						let para = Object.assign({}, this.editForm);
-						para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-						editUser(para).then((res) => {
-							this.editLoading = false;
-							//NProgress.done();
-							this.$message({
-								message: '提交成功',
-								type: 'success'
-							});
-							this.$refs['editForm'].resetFields();
-							this.editFormVisible = false;
-							this.getUsers();
-						});
-					});
-				}
-			});
-		},*/
-		//新增
-		/*addSubmit: function () {
-			this.$refs.addForm.validate((valid) => {
-				if (valid) {
-					this.$confirm('确认提交吗？', '提示', {}).then(() => {
-						this.addLoading = true;
-						//NProgress.start();
-						let para = Object.assign({}, this.addForm);
-						para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-						addUser(para).then((res) => {
-							this.addLoading = false;
-							//NProgress.done();
-							this.$message({
-								message: '提交成功',
-								type: 'success'
-							});
-							this.$refs['addForm'].resetFields();
-							this.addFormVisible = false;
-							this.getUsers();
-						});
-					});
-				}
-			});
-		},*/
-		/*//批量删除
-		batchRemove: function () {
-			var ids = this.sels.map(item => item.id).toString();
-			this.$confirm('确认删除选中记录吗？', '提示', {
-				type: 'warning'
-			}).then(() => {
-				this.listLoading = true;
-				//NProgress.start();
-				let para = { ids: ids };
-				batchRemoveUser(para).then((res) => {
-					this.listLoading = false;
-					//NProgress.done();
-					this.$message({
-						message: '删除成功',
-						type: 'success'
-					});
-					this.getUsers();
-				});
-			}).catch(() => {});
-	    }*/
 	}
 }
 </script>

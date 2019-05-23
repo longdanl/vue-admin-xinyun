@@ -1,13 +1,26 @@
 <template>
 	<section>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="filters">
+				<el-select v-model="filters.types" placeholder="文件类型">
+					<el-option label="音频" value="音频"></el-option>
+					<el-option label="视频" value="视频"></el-option>
+				</el-select>
+				<el-form-item>
+					<el-button type="primary" @click="getFilesByMemo">查询</el-button>
+				</el-form-item>
+				<el-form-item class="btn" style="float: right">
+					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
 		<!--文件列表-->
 		<div style="padding-top: 10px"></div>
-		<el-table  border stripe ref="singleTable" align:="center" :data="files" v-loading="listLoading" style="width: 80%;">
+		<el-table  border stripe ref="singleTable" align:="center" :data="files" v-loading="listLoading" style="width: 66%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
 			<el-table-column prop="memo" label="文件名" min-width="100">
-			</el-table-column>
-			<el-table-column prop="filename" label="文件名" min-width="200">
 			</el-table-column>
 			<el-table-column prop="type" label="文件类型"  width="120" :formatter="formatType" sortable>
 			</el-table-column>
@@ -16,11 +29,13 @@
 					<i class="fa fa-play-circle-o" v-if="showFile" @click="handlePlay(scope.$index, scope.row)"></i>
 				</template>
 			</el-table-column>
-			<el-table-column prop="upload_timestamp" label="上传时间" width="200">
+			<el-table-column prop="upload_timestamp" label="上传时间" width="200" sortable>
 			</el-table-column>
-			<el-table-column prop="username" label="用户名" width="200">
+			<el-table-column prop="username" label="上传用户" width="200">
+				longdan
 			</el-table-column>
-			<el-table-column prop="is_default" label="设置默认彩铃" width="200">
+			<el-table-column prop="is_default" label="默认彩铃" width="120" sortable>
+				是
 			</el-table-column>
 			<el-table-column prop="calling_numbers" label="主叫号码" width="162">
 				17624203889;...
@@ -32,12 +47,15 @@
 			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
 			</el-pagination>
 		</el-col>
-		<!--播放界面-->
-		<el-dialog title="点击按钮播放音频/视频" v-model="playing" :close-on-click-modal="false" style="width:50%;margin-left:25%;margin-bottom:-50%;text-align: center">
-			<audio  src="http://www.w3school.com.cn/i/song.ogg" controls="controls" v-model="music">
+		<!--音频播放界面-->
+		<el-dialog title="点击按钮播放音频" v-model="playingMusic" :close-on-click-modal="false" style="width:50%;margin-left:25%;margin-bottom:-50%;text-align: center">
+			<audio  src="http://www.w3school.com.cn/i/song.ogg" controls="controls">
 				您的浏览器不支持预览。
 			</audio >
-			<video  src="http://www.w3school.com.cn/i/movie.ogg" controls="controls" v-model="video">
+		</el-dialog>
+		<!--视频播放界面-->
+		<el-dialog title="点击按钮播放视频" v-model="playingVideo" :close-on-click-modal="false" style="width:50%;margin-left:25%;margin-bottom:-50%;text-align: center">
+			<video  src="http://www.w3school.com.cn/i/movie.ogg" controls="controls">
 				您的浏览器不支持预览。
 			</video >
 		</el-dialog>
@@ -48,7 +66,7 @@
 					<el-form-item label="文件名" prop="memo">
 						<el-input v-model="memo" auto-complete="off"></el-input>
 					</el-form-item>
-					<el-form-item label="用户名" prop="username">
+					<el-form-item label="上传用户" prop="username">
 						<el-input v-model="username" auto-complete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="文件类型">
@@ -68,21 +86,26 @@
 	</section>
 </template>
 <script>
-import { upload,getFiles,downloadFiles} from '@/api/crbt'
+import qs from 'qs'
+import {formatDate} from '../../common/js/util'
+import { upload,getFiles,downloadFiles,getFileByMemo} from '@/api/crbt'
 export default {
 	data() {
 		return {
+			filters: {
+				types:''
+			},
 			file: '',
 			memo:'',
 			type:'',
 			username:'',
+			time:'',
 			files: [],
 			total: 0,
 			page: 1,
-			music:false,
-			video:false,
 			showFile:true,
-			playing:false,
+			playingMusic:false,
+			playingVideo:false,
 			listLoading: false,
 			sel: '',//列表选中列
 			setFormVisible: false,
@@ -111,10 +134,56 @@ export default {
 		formatType: function (row) {
 			return row.type == 1 ? '视频' :'音频';
 		},
+		//获取文件列表
+		async getFiles() {
+			this.listLoading = false;
+			const res = await getFiles();
+			this.files = res.list;
+			console.log(this.files);
+			//时间转换
+			for(let i=0;i<this.files.length;i++){
+				let upload_timestamp = this.files[i].upload_timestamp;
+				upload_timestamp = formatDate(new Date(upload_timestamp), 'yyyy-MM-dd hh:mm:ss');
+				this.files[i].upload_timestamp = upload_timestamp
+			}
+		},
+		//查询文件
+		async getFilesByMemo() {
+			//this.listLoading = true;
+			const res = await getFileByMemo(this.filters.types);
+			if(res.code!==0 && this.filters.types !==""){
+				this.$message({
+					message: res.description,
+					type: 'error'
+				});
+				this.files=""
+			}else if(this.filters.types ==""){
+				this.$message({
+					message: "请输入查询信息",
+					type: 'error'
+				});
+				this.files=""
+			}else{
+				console.log(res.list)
+				if(res.list.length===0){
+					this.filters.types=""
+					this.files=""
+				}else{
+					let list = new Array();
+					for(let i=0;i<res.list.length;i++){
+						list.push(res.list[i]);
+						this.files = list;
+						this.filters.types=""
+					}
+				}
+			}
+		},
+		//获取文件
 		getFile(event) {
 			this.file = event.target.files[0];
 			console.log(this.file);
 		},
+		//上传文件
 		submit(event) {
 			console.log('文件'+this.file);
 			if(!this.memo){
@@ -168,17 +237,14 @@ export default {
 				}).catch(err => {})
 			}
 		},
-		//预览文件
+		//预览/下载文件
 		async handlePlay(index, row) {
-			console.log(row.type)
-			if(row.type === 1){
-				this.playing = true;
-				this.video = true;
+			console.log(row.type);
+			if(row.type === 0){
+				this.playingMusic = true;
 			}else{
-				this.music = true;
-				this.playing = true;
+				this.playingVideo = true;
 			}
-			console.log(row.filename+'12345')
 			let para = {filename: row.filename};
 			await downloadFiles(para.filename);
 		},
@@ -209,20 +275,9 @@ export default {
 			this.page = val;
 			this.getUsers();
 		},
-		//获取文件列表
-		async getFiles() {
-			this.listLoading = false;
-			const res = await getFiles();
-			console.log(res+'---------');
-			this.files = res.list;
-		},
 		//显示新增文件界面
 		handleAdd: function () {
 			this.addFormVisible = true;
-			this.addForm = {
-				remarks: '',
-				type: "",
-			};
 		},
 	}
 }
@@ -242,11 +297,11 @@ export default {
 		background: red;
 
 	}
-	.fa-play-circle-o,.fa-pause-circle-o{
+	.fa-play-circle-o{
 		cursor:pointer;
 		font-size: 20px
 	}
-	.fa-play-circle-o:hover,.fa-pause-circle-o:hover{
+	.fa-play-circle-o:hover{
 		color:deepskyblue;
 	}
 </style>

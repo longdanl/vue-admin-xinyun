@@ -1,42 +1,41 @@
 <template>
 	<section>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="filters">
+				<el-form-item>
+					<el-input v-model="filters.phone" placeholder="主叫号码"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary">查询</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="handleAddPhone">新增</el-button>
+				</el-form-item>
+				<el-form-item class="btn" style="float: right">
+					<el-button size="mini"><i class="fa fa-refresh" aria-hidden="true" @click="refresh"></i></el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
 		<!--彩铃列表-->
-		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="phoneList" v-loading="listLoading" style="width: 70%;">
+		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="phoneList" v-loading="listLoading" style="width: 40%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
-			<el-table-column prop="call_phone" label="被叫号码" width="200">
+			<el-table-column prop="phone" label="主叫号码" width="150">
 			</el-table-column>
-			<el-table-column prop="arbt" label="音频文件"  min-width="200" @click="handleEdit">
-				<editable-cell
-						slot-scope="{row}"
-						editable-component="el-select"
-						:can-edit="editModeEnabled"
-						close-event="change"
-						v-model="row.arbt">
-					<el-tag size="medium"
-							slot="content">
-						{{row.arbt === '音频1' ? '音频1': '音频2'}}
-					</el-tag>
-					<template slot="edit-component-slot">
-						<el-option value="音频1" label="音频1"></el-option>
-						<el-option value="视频1" label="音频2"></el-option>
-					</template>
-				</editable-cell>
+			<!--<el-table-column prop="call_phone" label="被叫号码" width="200">
+			</el-table-column>-->
+			<el-table-column prop="arbt" label="音频文件" width="160">
 			</el-table-column>
-			<el-table-column prop="vrbt" label="视频文件"  width="200">
-				<editable-cell :show-input="row.editMode" slot-scope="{row}" v-model="row.vrbt">
-					<span slot="content">{{row.vrbt}}</span>
-				</editable-cell>
+			<el-table-column prop="vrbt" label="视频文件" width="160">
 			</el-table-column>
-			<el-table-column prop="seeIt" label="预览" width="160" class="isPlaying">
-				<i class="fa fa-play-circle-o" style='font-size: 24px;' v-show="playing"></i>
-				<i class="fa fa-pause-circle-o" style='font-size: 24px;' v-show="!playing"></i>
-			</el-table-column>
-			<el-table-column prop="phone" label="主叫号码" width="168">
-			</el-table-column>
-			<el-table-column label="操作" width=190 class="showBtn">
+			<!--<el-table-column prop="seeIt" label="预览" width="80" class="isPlaying">
+				<i class="fa fa-play-circle-o"></i>
+			</el-table-column>-->
+			<el-table-column label="操作" width=145 class="showBtn">
 				<template scope="scope">
-					<el-button type="danger" size="small" @click="handleChoose(scope.row)">删除</el-button>
+					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+					<el-button type="danger" size="small">删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -45,19 +44,57 @@
 			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
 			</el-pagination>
 		</el-col>
-		<!--主叫号码编辑界面-->
-		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
-			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-				<el-form-item label="用户名" prop="name">
-					<el-input v-model="editForm.username" auto-complete="off"></el-input>
+		<!--主叫号码新增界面-->
+		<el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
+			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
+				<el-form-item label="主叫号码" prop="phone">
+					<el-input v-model="addForm.phone" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="手机号码">
-					<el-input v-model="editForm.phone"></el-input>
+				<el-form-item label="音频文件" prop="arbt">
+					<el-select v-model="addForm.arbt" placeholder="文件名">
+						<el-option label="音频1" value="音频1"></el-option>
+						<el-option label="音频2" value="音频2"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="视频文件" prop="vrbt">
+					<el-select v-model="addForm.vrbt" placeholder="文件名">
+						<el-option label="视频1" value="视频1"></el-option>
+						<el-option label="视频2" value="视频2"></el-option>
+						<el-option label="视频3" value="视频3"></el-option>
+						<el-option label="视频4" value="视频4"></el-option>
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addFormVisible = false">取消</el-button>
+				<el-button type="primary":loading="addLoading" @click.native="addPhone">提交</el-button>
+			</div>
+		</el-dialog>
+		<!--主叫号码编辑界面-->
+		<!--编辑界面-->
+		<el-dialog title="新增" v-model="editFormVisible" :close-on-click-modal="false">
+			<el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="addForm">
+				<el-form-item label="主叫号码" prop="phone">
+					<el-input v-model="editForm.phone" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="音频文件" prop="arbt">
+					<el-select v-model="editForm.arbt" placeholder="文件名">
+						<el-option label="音频1" value="音频1"></el-option>
+						<el-option label="音频2" value="音频2"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="视频文件" prop="vrbt">
+					<el-select v-model="editForm.vrbt" placeholder="文件名">
+						<el-option label="视频1" value="视频1"></el-option>
+						<el-option label="视频2" value="视频2"></el-option>
+						<el-option label="视频3" value="视频3"></el-option>
+						<el-option label="视频4" value="视频4"></el-option>
+					</el-select>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="editFormVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="updateUsers" :loading="editLoading">提交</el-button>
+				<el-button type="primary" :loading="editLoading" @click.native="editPhone">提交</el-button>
 			</div>
 		</el-dialog>
 	</section>
@@ -65,27 +102,24 @@
 
 <script>
 import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById} from '@/api/users'
-import EditableCell from "../../components/EditableCell.vue";
 export default {
-	components: {
-		EditableCell
-	},
 	data() {
 		return {
-			editModeEnabled: true,
+			filters: {
+				phone: ''
+			},
 			phoneList:[
 				{
 					call_phone:'',
+					phone:'17624203889',
 					arbt:'音频1',
 					vrbt:'视频1',
-					phone:'17624203889',
 					is_default:1
 				},
 				{
 					call_phone:'10099',
-					arbt:'音频2',
-					vrbt:'视频2',
 					phone:'17624203889',
+					arbt:'音频2',
 					is_default:0
 				},
 			],
@@ -99,47 +133,34 @@ export default {
 			editFormVisible: false,//编辑界面是否显示
 			editLoading: false,
 			editFormRules: {
-				username: [
-					{required: true, message: '请输入用户名', trigger: 'blur'}
+				phone: [
+					{required: true, message: '请输入主叫号码', trigger: 'blur'}
 				]
 			},
 			//编辑界面数据
 			editForm: {
-				username: '',
-				phone: "",
+				phone:'',
+				arbt:'',
+				vrbt:''
 			},
 			addFormVisible: false,//新增界面是否显示
 			addLoading: false,
 			addFormRules: {
-				username: [
-					{required: true, message: '请输入用户名', trigger: 'blur'}
+				phone: [
+					{required: true, message: '请输入主叫号码', trigger: 'blur'}
 				]
 			},
 			//新增界面数据
 			addForm: {
-				username: '',
-				password:'',
+				phone:'',
+				arbt:'',
+				vrbt:''
 			},
-			//上传音频界面数据
-			uploadFormVisible: false,//新增界面是否显示
-			uploadLoading: false,
-			uploadForm: {
-				remark:''
-			},
-			currentRow: null
 		}
 	},
 	created() {
 		//this.listLoading=true;
 		this.getUsers();
-	},
-	mounted() {
-		this.gridData = this.gridData.map(row => {
-			return {
-				...row,
-				editMode: false
-			};
-		});
 	},
 	methods: {
 		formatActive: function (row) {
@@ -149,11 +170,6 @@ export default {
 		refresh() {
 			//this.listLoading = true;
 			this.getUsers();
-		},
-		//显示用户编辑界面
-		handleEdit: function (index, row) {
-			this.editFormVisible = true;
-			this.editForm = Object.assign({}, row);
 		},
 		handleCurrentChange(val) {
 			this.page = val;
@@ -193,9 +209,6 @@ export default {
 			const res = await getUsers();
 			this.users = res.list;
 		},
-		handleRowChange(val) {
-			this.currentRow = val;
-		},
 		//删除用户
 		handleDel(index, row) {
 			let para = {id: row.id};
@@ -215,8 +228,8 @@ export default {
 			})
 		},
 		//显示编辑界面
-		handleSet: function (index, row) {
-			this.setFormVisible = true;
+		handleEdit: function (index, row) {
+			this.editFormVisible = true;
 			this.editForm = Object.assign({}, row);
 		},
 		//编辑用户
@@ -242,25 +255,23 @@ export default {
 			})
 		},
 		//显示新增界面
-		handleAdd: function () {
+		handleAddPhone: function () {
 			this.addFormVisible = true;
 			this.addForm = {
-				username: '',
 				phone: "",
+				arbt:'',
+				vrbt:''
 			};
 		},
 		//新增用户
-		async addUsers() {
-				const res = await addUsers(this.addForm);
-				this.$message({
-					message: '提交成功',
-					type: 'success'
-				});
-				this.addFormVisible = false;
-				this.addLoading = false;
-				this.$refs['addForm'].resetFields();
-				console.log(res);
-				this.getUsers();
+		addPhone() {
+			this.addFormVisible = false;
+			this.addLoading = false;
+		},
+		//新增用户
+		editPhone() {
+			this.editFormVisible = false;
+			this.editLoading = false;
 		},
 		tableRowClassName({row, rowIndex}) {
 			if (rowIndex === 1) {
@@ -304,8 +315,14 @@ export default {
 		font-size: 40px;
 		color: red;
 	}
-	.edit-cell {
-		min-height: 35px;
-		cursor: pointer;
+	.fa-play-circle-o{
+		cursor:pointer;
+		font-size: 20px
+	}
+	.showMusicList{
+		display: none;
+	}
+	.showList:hover{
+		display: block;
 	}
 </style>
