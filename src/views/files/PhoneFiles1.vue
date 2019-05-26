@@ -18,7 +18,7 @@
 			</el-form>
 		</el-col>
 		<!--彩铃列表-->
-		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="phoneList" v-loading="listLoading" style="width: 40%;">
+		<el-table :row-class-name="tableRowClassName" border stripe ref="singleTable" align:="center" :data="users" v-loading="listLoading" style="width: 40%;">
 			<el-table-column type="index" width="56">
 			</el-table-column>
 			<el-table-column prop="phone" label="主叫号码" width="150">
@@ -41,7 +41,9 @@
 		</el-table>
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
+			<el-pagination  style="float: right" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
+						   :page-sizes="[10, 20,50, 100]" :page-size="limit" layout="total, sizes, prev, pager, next, jumper"
+						   :total="total">
 			</el-pagination>
 		</el-col>
 		<!--主叫号码新增界面-->
@@ -105,9 +107,15 @@ import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById} from '@/api
 export default {
 	data() {
 		return {
+			list: [],
+			data: [],
+			limit: 10,
+			total: null,
+			page: 1,
 			filters: {
 				phone: ''
 			},
+			users:[],
 			phoneList:[
 				{
 					call_phone:'',
@@ -122,11 +130,454 @@ export default {
 					arbt:'音频2',
 					is_default:0
 				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+				{
+					call_phone:'10099',
+					phone:'17624203889',
+					arbt:'音频2',
+					is_default:0
+				},
+
 			],
             playing:true,
 			is_default:false,
-			total: 0,
-			page: 1,
 			listLoading: false,
 			sel: '',//列表选中列
 			setFormVisible: false,
@@ -200,14 +651,29 @@ export default {
 				//this.users = users;
 				console.log(list);
 				this.users = list;
-				this.filters.id=""
+				this.filters.id="",
+				this.page = 1
 			}
 		},
 		//获取用户列表
 		async getUsers() {
 			this.listLoading = false;
-			const res = await getUsers();
-			this.users = res.list;
+			this.users = this.phoneList.filter((item, index) =>
+					index < this.page * this.limit && index >= this.limit * (this.page - 1)
+			)
+			this.total = this.phoneList.length
+		},
+		// 当每页数量改变
+		handleSizeChange(val) {
+			console.log(`每页 ${val} 条`);
+			this.limit = val
+			this.getUsers()
+		},
+		// 当当前页改变
+		handleCurrentChange(val) {
+			console.log(`当前页: ${val}`);
+			this.page = val
+			this.getUsers()
 		},
 		//删除用户
 		handleDel(index, row) {
