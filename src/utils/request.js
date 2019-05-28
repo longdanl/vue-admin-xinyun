@@ -39,10 +39,12 @@ service.interceptors.response.use(
    // console.log(res.access_token)
     //一般接口返回的通过的code为0：
     if (res.code !== 0 &&res.access_token==="" ) {
-        Message({
-            message:res.description,
-            type:'error'
-        });
+      Message({
+        message: res.message || '错误error',
+        type: 'error',
+        duration: 5 * 1000
+      });
+
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       // if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
       //   // to re-login
@@ -64,8 +66,9 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error);
     Message({
-        message:'系统繁忙，请稍后再试！',
-        type:'error'
+      message: error.message,
+      type: 'error',
+      duration: 5 * 1000
     });
     return Promise.reject(error)
   }

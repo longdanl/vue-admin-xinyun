@@ -28,7 +28,6 @@ Vue.use(vueztree);
   routes
 })*/
 
-/*
 router.beforeEach((to, from, next) => {
   //NProgress.start();
   if (to.path == '/login') {
@@ -41,7 +40,6 @@ router.beforeEach((to, from, next) => {
     next()
   }
 });
-*/
 
 //router.afterEach(transition => {
 //NProgress.done();

@@ -41,7 +41,9 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="deleteUsersBatch" :disabled="this.sels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
+			<el-pagination  style="float: right" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
+							:page-sizes="[10, 20,50, 100]" :page-size="limit" layout="total, sizes, prev, pager, next, jumper"
+							:total="total">
 			</el-pagination>
 		</el-col>
 		<!--编辑界面-->
@@ -102,7 +104,8 @@
 </template>
 
 <script>
-import { getUsers, addUsers, deleteUsers, updateUsers, getUsersById, deleteUsersBatch } from '@/api/users'
+import qs from "qs"
+import {getUsersPage, getUsers, addUsers, deleteUsers, updateUsers, getUsersById, deleteUsersBatch } from '@/api/users'
 export default {
 	data() {
 		return {
@@ -110,7 +113,8 @@ export default {
 				id: ''
 			},
 			users: [],
-			total: 0,
+			limit: 10,
+			total: null,
 			page: 1,
 			listLoading: false,
 			sels: [],//列表选中列
@@ -163,6 +167,13 @@ export default {
 		formatActive: function (row) {
 			return row.active == 1 ? '启用' :'禁用';
 		},
+		// 当每页数量改变
+		handleSizeChange(val) {
+			console.log(`每页 ${val} 条`);
+			this.limit = val
+			this.getUsers()
+		},
+		// 当当前页改变
 		handleCurrentChange(val) {
 			this.page = val;
 			this.getUsers();
@@ -187,7 +198,9 @@ export default {
 					message: "请输入用户ID",
 					type: 'error'
 				});
-				this.users=""
+				this.users="";
+				this.page = 1;
+				this.total = 0
 			}else{
 				console.log(res)
 				let list = new Array();
@@ -197,26 +210,18 @@ export default {
 				//this.users = users;
 				console.log(list);
 				this.users = list;
-				this.filters.id=""
+				this.filters.id="";
+				this.page = 1;
+				this.total = this.users.length
 			}
 		},
 		//获取用户列表
 		async getUsers() {
 			this.listLoading = false;
-			const res = await getUsers();
-			this.users = res.list;
-			//this.listLoading = false;
-			/*this.total = res.total;
-			let page = 1;
-			this.users = this.users.filter((u, index) => index < 20 * page && index >= 20 * (page - 1));
-			return new Promise((resolve, reject) => {
-				setTimeout(() => {
-					resolve([200, {
-						total: total,
-					}]);
-				}, 1000);
-			});*/
-			//console.log("this.users"+this.users);
+			const res = await getUsers(qs.stringify({page:this.page,
+					page_size: this.limit}));
+			this.total = res.total;
+			this.users = res.list
 		},
 		selsChange: function (sels) {
 		this.sels = sels;

@@ -13,6 +13,7 @@ import Journal from '../views/nav2/Journal.vue'
 import Role from '../views/nav1/Role.vue'
 import Resource from '../views/nav1/Resource.vue'
 import Echarts from '../views/charts/Echarts.vue'
+import play1 from '../views/charts/play1.vue'
 import Files1 from '../views/files/Files1'
 import PhoneFiles1 from '../views/files/PhoneFiles1'
 
@@ -60,7 +61,7 @@ export const constantRoutes = [
         menuShow: true,
         children: [
             { path: '/files1', component: Files1, name: '文件管理',menuShow: true},
-            { path: '/phoneFiles1', component: PhoneFiles1, name: '号码管理',menuShow: true},
+            { path: '/phoneFiles1', component: PhoneFiles1, name: '号码绑定',menuShow: true},
         ]
     },
     {
@@ -81,7 +82,8 @@ export const constantRoutes = [
         iconCls: 'fa fa-bar-chart',
         menuShow: true,
         children: [
-            { path: '/echarts', component: Echarts, name: 'Echarts.vue',menuShow: true }
+            { path: '/echarts', component: Echarts, name: 'Echarts.vue',menuShow: true },
+            { path: '/play1', component: play1, name: 'play1.vue',menuShow: true }
         ]
     },
     {

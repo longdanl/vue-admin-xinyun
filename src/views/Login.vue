@@ -74,8 +74,12 @@
                         });
                       }
                     })
-                    .catch((res) => {
+                    .catch(() => {
                       this.loading = false;
+                      this.$message({
+                        message:'用户名或密码错误',
+                        type:'error'
+                      });
                     });
             this.logining = false;
           }else{
@@ -87,7 +91,9 @@
       }
     }
   }
+
 </script>
+
 <style lang="scss" scoped>
   .login {
     height: 100%;

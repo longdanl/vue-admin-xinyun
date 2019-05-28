@@ -3,10 +3,13 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
 			<el-form :inline="true" :model="filters">
-				<el-select v-model="filters.types" placeholder="文件类型">
-					<el-option label="音频" value="音频"></el-option>
+				<!--<el-select v-model="filters.types" placeholder="文件类型">
+					<el-option label="音频" value="音频" v-bind=files.type></el-option>
 					<el-option label="视频" value="视频"></el-option>
-				</el-select>
+				</el-select>-->
+                <el-form-item>
+                    <el-input v-model="filters.types"></el-input>
+                </el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="getFilesByMemo">查询</el-button>
 				</el-form-item>
@@ -32,7 +35,6 @@
 			<el-table-column prop="upload_timestamp" label="上传时间" width="200" sortable>
 			</el-table-column>
 			<el-table-column prop="username" label="上传用户" width="200">
-				longdan
 			</el-table-column>
 			<el-table-column prop="is_default" label="默认彩铃" width="120" sortable>
 				是
@@ -44,20 +46,20 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button><i class="fa fa-cloud-upload" aria-hidden="true" @click="handleAdd">上传文件</i></el-button>
-			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange"  :total="total" style="float:right;">
-			</el-pagination>
+            <el-pagination  style="float: right" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
+                            :page-sizes="[10, 20,50, 100]" :page-size="limit" layout="total, sizes, prev, pager, next, jumper"
+                            :total="total">
+            </el-pagination>
 		</el-col>
 		<!--音频播放界面-->
 		<el-dialog title="点击按钮播放音频" v-model="playingMusic" :close-on-click-modal="false" style="width:50%;margin-left:25%;margin-bottom:-50%;text-align: center">
-			<audio  src="http://www.w3school.com.cn/i/song.ogg" controls="controls">
-				您的浏览器不支持预览。
-			</audio >
+            <audio src="http://172.16.10.66:8080/" controls autoplay loop>
+                HTML5 audio not supported
+            </audio>
 		</el-dialog>
 		<!--视频播放界面-->
 		<el-dialog title="点击按钮播放视频" v-model="playingVideo" :close-on-click-modal="false" style="width:50%;margin-left:25%;margin-bottom:-50%;text-align: center">
-			<video  src="http://www.w3school.com.cn/i/movie.ogg" controls="controls">
-				您的浏览器不支持预览。
-			</video >
+			<video :src="files.filename" class="avatar" controls="controls">您的浏览器不支持视频播放</video>
 		</el-dialog>
 		<!--上传界面-->
 		<el-dialog title="上传音频/视频" v-model="addFormVisible" :close-on-click-modal="false">
@@ -65,9 +67,6 @@
 				<el-form>
 					<el-form-item label="文件名" prop="memo">
 						<el-input v-model="memo" auto-complete="off"></el-input>
-					</el-form-item>
-					<el-form-item label="上传用户" prop="username">
-						<el-input v-model="username" auto-complete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="文件类型">
 						<el-radio-group v-model="type">
@@ -86,7 +85,7 @@
 	</section>
 </template>
 <script>
-import qs from 'qs'
+import qs from "qs"
 import {formatDate} from '../../common/js/util'
 import { upload,getFiles,downloadFiles,getFileByMemo} from '@/api/crbt'
 export default {
@@ -101,8 +100,9 @@ export default {
 			username:'',
 			time:'',
 			files: [],
-			total: 0,
-			page: 1,
+            total: null,
+            page: 1,
+            limit:10,
 			showFile:true,
 			playingMusic:false,
 			playingVideo:false,
@@ -116,6 +116,7 @@ export default {
 					{required: true, message: '请输入用户名', trigger: 'blur'}
 				]
 			},
+			baseUr:"",
 			//编辑界面数据
 			editForm: {
 				username: '',
@@ -134,15 +135,30 @@ export default {
 		formatType: function (row) {
 			return row.type == 1 ? '视频' :'音频';
 		},
+        // 当每页数量改变
+        handleSizeChange(val) {
+            console.log(`每页 ${val} 条`);
+            this.limit = val
+            this.getFiles()
+        },
+        // 当当前页改变
+        handleCurrentChange(val) {
+            console.log(`当前页: ${val}`);
+            this.page = val;
+            this.getFiles()
+        },
 		//获取文件列表
 		async getFiles() {
 			this.listLoading = false;
-			const res = await getFiles();
-			this.files = res.list;
-			console.log(this.files);
+            const res = await getFiles(qs.stringify({page:this.page,
+                page_size: this.limit}));
+            this.total = res.total;
+            this.files = res.list;
 			//时间转换
 			for(let i=0;i<this.files.length;i++){
 				let upload_timestamp = this.files[i].upload_timestamp;
+				let filename1 = this.files[i].filename;
+				console.log(filename1)
 				upload_timestamp = formatDate(new Date(upload_timestamp), 'yyyy-MM-dd hh:mm:ss');
 				this.files[i].upload_timestamp = upload_timestamp
 			}
@@ -167,13 +183,17 @@ export default {
 				console.log(res.list)
 				if(res.list.length===0){
 					this.filters.types=""
-					this.files=""
+					this.files="";
+                    this.page = 1;
+                    this.total = 0
 				}else{
 					let list = new Array();
 					for(let i=0;i<res.list.length;i++){
 						list.push(res.list[i]);
 						this.files = list;
 						this.filters.types=""
+                        this.page = 1;
+						this.total = this.files.length
 					}
 				}
 			}
@@ -214,13 +234,14 @@ export default {
 				}).then(async()=> {
 					await upload(formData)
 						.then((res)=> {
-							console.log(res);
 							if(res.code===0){
 								this.$message({
 									message: '上传成功',
 									type: 'success'
 								});
-								this.addFormVisible=false
+								this.addFormVisible=false;
+								let user = JSON.parse(sessionStorage.getItem('user'));
+								this.username = user.username;
 								this.getFile()
 							}else{
 								this.$message({
@@ -228,12 +249,7 @@ export default {
 									type: 'error'
 								});
 							}
-						}).catch((error)=>{
-							this.$message({
-								message: error.description,
-								type: 'error'
-							});
-					})
+						}).catch((error)=>{})
 				}).catch(err => {})
 			}
 		},
@@ -246,7 +262,9 @@ export default {
 				this.playingVideo = true;
 			}
 			let para = {filename: row.filename};
-			await downloadFiles(para.filename);
+			const playfile = await downloadFiles(para.filename);
+			this.baseUr = "http://172.16.10.66:8080/crbt/10086/files/"+row.filename
+			console.log(playfile)
 		},
 
 		/*// 上传前对文件的大小的判断
@@ -269,11 +287,7 @@ export default {
 		//刷新
 		refresh() {
 			this.listLoading = true;
-			this.getUsers();
-		},
-		handleCurrentChange(val) {
-			this.page = val;
-			this.getUsers();
+            this.getFiles();
 		},
 		//显示新增文件界面
 		handleAdd: function () {
@@ -282,7 +296,6 @@ export default {
 	}
 }
 </script>
-
 <style scoped>
 	.btn .el-button{
 		font-size: 16px;

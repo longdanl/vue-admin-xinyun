@@ -6,14 +6,13 @@ import request from '@/utils/request'
         method: 'get'
     })
 }*/
-//获取用户
-export function getUsers() {
+//获取用户(分页)
+export function getUsers(data) {
     return request({
-        url: '/api/users',
+        url: '/api/users?'+data,
         method: 'get'
     })
 }
-
 //根据id获取用户
 export function getUsersById(userId) {
     return request({
